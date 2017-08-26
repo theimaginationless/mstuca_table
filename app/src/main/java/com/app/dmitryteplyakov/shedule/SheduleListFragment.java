@@ -66,7 +66,7 @@ public class SheduleListFragment extends Fragment {
     private SwipeRefreshLayout mSwipeRefreshData;
     private boolean swipeRefresh;
 
-    private boolean downloadFile() {
+    private boolean downloadFile(Context mContext) {
         InputStream input = null;
         FileOutputStream output = null;
         FileInputStream localeShedule = null;
@@ -78,10 +78,10 @@ public class SheduleListFragment extends Fragment {
             String lastModRemoteString = connection.getHeaderField("Last-Modified");
             SimpleDateFormat dateformatter = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             Date lastModRemote = new Date(connection.getLastModified());
-            File localFile = new File(getActivity().getFilesDir() + "/" + filename);
+            File localFile = new File(mContext.getFilesDir() + "/" + filename);
             Log.d("DW", Boolean.toString(localFile.exists()));
             if (localFile.exists()) {
-                localeShedule = getActivity().openFileInput(filename);
+                localeShedule = mContext.openFileInput(filename);
                 Date lastModLocal = new Date(localFile.lastModified());
                 Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
 
@@ -94,7 +94,7 @@ public class SheduleListFragment extends Fragment {
             }
 
 
-            output = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
+            output = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
 
             int read;
             byte[] data = new byte[1024];
@@ -441,17 +441,16 @@ public class SheduleListFragment extends Fragment {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    private void workingOn() {
+    private void workingOn(final Context mContext) {
         dSuccess = false;
 
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 Log.d("DownloadTask", "Download started!");
-                dSuccess = downloadFile();
+                dSuccess = downloadFile(mContext);
             }
         });
-        mProgressBar = getActivity().findViewById(R.id.progressbar);
         Thread readThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -480,51 +479,98 @@ public class SheduleListFragment extends Fragment {
         swipeRefresh = false;
     }
 
-    private void checkStarter() {
+    private void checkStarter(Context mContext) {
+        Thread thread = null;
         if(isOnline()) {
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    workingOn();
-                }
-            });
+            //thread = new Thread(new Runnable() {
+            //    @Override
+            //    public void run() {
+                    workingOn(mContext);
+            //    }
+            //});
+            //getActivity().runOnUiThread(new Runnable() {
+            //    @Override
+            //    public void run() {
+  //                  mSwipeRefreshData.setRefreshing(true);
+            //    }
+            //});
+            //thread.start();
+            //getActivity().runOnUiThread(new Runnable() {
+            //   @Override
+            //    public void run() {
+//                    mSwipeRefreshData.setRefreshing(false);
+            //    }
+            //});
+        } else {
+            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
+        }
+        //if(thread != null) {
+        //    try {
+        //        thread.join();
+        //    } catch(InterruptedException e) {
+        //        Log.e("SLF", "Exception preUpdateView", e);
+        //    }
+        //}
+        //getActivity().runOnUiThread(new Runnable() {
+        //    @Override
+        //    public void run() {
+        //
+        //        updateUI();
+        //    }
+        //});
+
+        //getActivity().runOnUiThread(new Runnable() {
+        //    @Override
+        //    public void run() {
+        //        mSwipeRefreshData.setRefreshing(false);
+        //    }
+        //});
+        Log.d("SLF", "Connection state: " + Boolean.toString(isOnline()));
+    }
+
+    private class AsyncLoader extends AsyncTask<Context, Void, Void> {
+        private Context localContext;
+
+        @Override
+        protected void onPreExecute() {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mSwipeRefreshData.setRefreshing(true);
                 }
             });
-            thread.start();
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected Void doInBackground(Context ... contexts) {
+            for(Context context : contexts)
+                localContext = context;
+            checkStarter(localContext);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            Log.d("AsyncLoader", "Thread closed.");
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mSwipeRefreshData.setRefreshing(false);
+
                 }
             });
-        } else {
-            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
+            updateUI(localContext);
+            Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+            super.onPostExecute(result);
         }
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                updateUI();
-            }
-        });
-
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mSwipeRefreshData.setRefreshing(false);
-            }
-        });
-        Log.d("SLF", "Connection state: " + Boolean.toString(isOnline()));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_shedule_list, container, false);
         setHasOptionsMenu(true);
-        //ProgressBar mProgressBarDownload = (ProgressBar) v.findViewById(R.id.progressBarDownload);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.shedule_list_recycler_view);
         mSwipeRefreshData = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         smoothScroller = new LinearSmoothScroller(getActivity()) {
@@ -540,12 +586,24 @@ public class SheduleListFragment extends Fragment {
         mSwipeRefreshData.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                checkStarter();
                 swipeRefresh = true;
+                AsyncLoader loader = new AsyncLoader();
+                loader.execute();
+                loader.doInBackground(getActivity());
+
             }
         });
 
-        checkStarter();
+        //checkStarter();
+        //getActivity().runOnUiThread(new Runnable() {
+        //    @Override
+        //    public void run() {
+                AsyncLoader loader = new AsyncLoader();
+                loader.execute();
+                loader.doInBackground(getActivity());
+        //    }
+        //});
+
         getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -725,17 +783,18 @@ public class SheduleListFragment extends Fragment {
         }
     }
 
-    private void updateUI() { // Обновление интерфейса. Связывание данных с адаптером
+    private void updateUI(Context mContext) { // Обновление интерфейса. Связывание данных с адаптером
         //List<Discipline> disciplines = DisciplineStorage.get(getActivity()).getDisciplines();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         //calendar.set(Calendar.MONTH, 8);
         //calendar.set(Calendar.DAY_OF_MONTH, 2);
-        List<Discipline> disciplines = DisciplineStorage.get(getActivity()).getDisciplines();
+        List<Discipline> disciplines = DisciplineStorage.get(mContext).getDisciplines();
         Collections.sort(disciplines, Discipline.dateComparator);
+        Log.d("DEBUG", Integer.toString(disciplines.size()));
         if(mAdapter == null) {
             mAdapter = new SheduleAdapter(disciplines); // Связывание списка данных с адаптером
-            mAdapter.setHasStableIds(true);
+            //mAdapter.setHasStableIds(true);
             mRecyclerView.setAdapter(mAdapter); // Назначение адаптера к RecyclerView
         } else {
             mAdapter.setDisciplines(disciplines);
@@ -765,7 +824,7 @@ public class SheduleListFragment extends Fragment {
         switch(item.getItemId()) {
             case R.id.refresh_toolbar:
                 swipeRefresh = true;
-                checkStarter();
+                checkStarter(getActivity());
                 return true;
         }
 
