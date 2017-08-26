@@ -514,7 +514,7 @@ public class SheduleListFragment extends Fragment {
         protected Void doInBackground(Context ... contexts) {
             for(Context context : contexts)
                 localContext = context;
-            DisciplineStorage.get(localContext).resetDb();
+            //DisciplineStorage.get(localContext).resetDb();
             Log.d("Thread", "Size: " + Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             //for(int i = 0; i < 4; i++) {
             //    if(i == 1)
@@ -530,7 +530,7 @@ public class SheduleListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             Log.d("AsyncLoader", "Thread closed.");
-            getActivity().runOnUiThread(new Runnable() {
+            ((AppCompatActivity)localContext).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mSwipeRefreshData.setRefreshing(false);
@@ -538,7 +538,7 @@ public class SheduleListFragment extends Fragment {
                 }
             });
             updateUI(localContext);
-            Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+            Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
         }
     }
@@ -572,6 +572,7 @@ public class SheduleListFragment extends Fragment {
 
         AsyncLoader loader = new AsyncLoader();
         loader.execute(getActivity());
+
         getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
