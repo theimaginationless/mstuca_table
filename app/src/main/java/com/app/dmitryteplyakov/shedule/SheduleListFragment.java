@@ -631,7 +631,7 @@ public class SheduleListFragment extends Fragment {
         public TextView mDate;
         private TextView mDurationTime;
         private Discipline mDiscipline;
-        private TextView mGlobalDate;
+        private TextView mPairNumber;
 
         public SheduleHolder(View itemView) {
             super(itemView);
@@ -642,18 +642,20 @@ public class SheduleListFragment extends Fragment {
             mLectureTypeTextView = (TextView) itemView.findViewById(R.id.lecture_type);
             mDurationTime = (TextView) itemView.findViewById(R.id.start_time);
             mDate = (TextView) itemView.findViewById(R.id.date);
+            mPairNumber = (TextView) itemView.findViewById(R.id.pair_counter);
         }
 
         public void bindShedule(Discipline discipline) {
             mDiscipline = discipline;
             mTeacherNameTextView.setText(discipline.getTeacherName());
-            mDiscipleNameTextView.setText(Integer.toString(discipline.getNumber()) + " " + discipline.getDiscipleName());
+            mDiscipleNameTextView.setText(discipline.getDiscipleName());
             mAuditoryTextView.setText(discipline.getAuditoryNumber());
             mLectureTypeTextView.setText(discipline.getType());
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");
             SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
             mDate.setText(dateFormatter.format(discipline.getDate()));
             mDurationTime.setText(timeFormatter.format(mDiscipline.getDate()) + " - " + timeFormatter.format(new Date(mDiscipline.getEndTime())));
+            mPairNumber.setText(Integer.toString(mDiscipline.getNumber()) + " " + getString(R.string.pair_counter_text));
         }
 
         @Override
@@ -671,6 +673,7 @@ public class SheduleListFragment extends Fragment {
         private TextView mDurationTime;
         private Discipline mDiscipline;
         private TextView mGlobalDate;
+        private TextView mPairNumber;
 
         public SheduleHolderDate(View itemView) {
             super(itemView);
@@ -682,12 +685,13 @@ public class SheduleListFragment extends Fragment {
             mDurationTime = (TextView) itemView.findViewById(R.id.start_time);
             mDate = (TextView) itemView.findViewById(R.id.date);
             mGlobalDate = (TextView) itemView.findViewById(R.id.global_date);
+            mPairNumber = (TextView) itemView.findViewById(R.id.pair_counter);
         }
 
         public void bindShedule(Discipline discipline) {
             mDiscipline = discipline;
             mTeacherNameTextView.setText(discipline.getTeacherName());
-            mDiscipleNameTextView.setText(Integer.toString(discipline.getNumber()) + " " + discipline.getDiscipleName());
+            mDiscipleNameTextView.setText(discipline.getDiscipleName());
             mAuditoryTextView.setText(discipline.getAuditoryNumber());
             mLectureTypeTextView.setText(discipline.getType());
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");
@@ -696,6 +700,8 @@ public class SheduleListFragment extends Fragment {
             mDate.setText(dateFormatter.format(discipline.getDate()));
             mDurationTime.setText(timeFormatter.format(mDiscipline.getDate()) + " - " + timeFormatter.format(new Date(mDiscipline.getEndTime())));
             mGlobalDate.setText(dateTitleFormatter.format(mDiscipline.getDate()));
+            mPairNumber.setText(Integer.toString(mDiscipline.getNumber()) + " " + getString(R.string.pair_counter_text));
+
         }
 
         @Override
