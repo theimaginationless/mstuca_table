@@ -1,6 +1,7 @@
 package com.app.dmitryteplyakov.shedule;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -65,6 +66,7 @@ public class SheduleListFragment extends Fragment {
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshData;
     private boolean swipeRefresh;
+    private boolean forcedUpdate;
 
     private boolean downloadFile(Context mContext) {
         InputStream input = null;
@@ -80,18 +82,22 @@ public class SheduleListFragment extends Fragment {
             Date lastModRemote = new Date(connection.getLastModified());
             File localFile = new File(mContext.getFilesDir() + "/" + filename);
             Log.d("DW", Boolean.toString(localFile.exists()));
-            if (localFile.exists()) {
-                localeShedule = mContext.openFileInput(filename);
-                Date lastModLocal = new Date(localFile.lastModified());
-                Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
+            if(!forcedUpdate) {
+                Log.d("SLFDownloader", "Forced updating...");
+                if (localFile.exists()) {
+                    localeShedule = mContext.openFileInput(filename);
+                    Date lastModLocal = new Date(localFile.lastModified());
+                    Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
 
-                if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
-                    if(swipeRefresh)
-                        Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
-                    Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
-                    return false;
+                    if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
+                        if (swipeRefresh)
+                            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
+                        Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
+                        return false;
+                    }
                 }
             }
+            forcedUpdate = false;
 
 
             output = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
@@ -121,7 +127,7 @@ public class SheduleListFragment extends Fragment {
 
     }
 
-    private void sheduleReader(boolean isNew) {
+    private void sheduleReader(boolean isNew, int sheet) {
         if (!isNew) {
             Log.d("SHDRDR", "Data is fresh. Skip updating...");
             return;
@@ -141,7 +147,7 @@ public class SheduleListFragment extends Fragment {
         } catch (IOException e) {
             Log.e("sheduleReader", "Error read shedule file!");
         }
-        HSSFSheet mySheduleSheet = myShedule.getSheetAt(0);
+        HSSFSheet mySheduleSheet = myShedule.getSheetAt(sheet);
 
         List<CellRangeAddress> regions = mySheduleSheet.getMergedRegions();
         for (int rowIndex = 1; rowIndex + 3 <= mySheduleSheet.getLastRowNum(); rowIndex++) {
@@ -441,7 +447,7 @@ public class SheduleListFragment extends Fragment {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    private void workingOn(final Context mContext) {
+    private void workingOn(final Context mContext, final int sheet) {
         dSuccess = false;
 
         Thread thread = new Thread(new Runnable() {
@@ -454,7 +460,7 @@ public class SheduleListFragment extends Fragment {
         Thread readThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                sheduleReader(dSuccess);
+                sheduleReader(dSuccess, sheet);
             }
         });
 
@@ -479,10 +485,10 @@ public class SheduleListFragment extends Fragment {
         swipeRefresh = false;
     }
 
-    private void checkStarter(Context mContext) {
+    private void checkStarter(Context mContext, int sheet) {
         Thread thread = null;
         if(isOnline()) {
-            workingOn(mContext);
+            workingOn(mContext, sheet);
         } else {
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
         }
@@ -508,7 +514,16 @@ public class SheduleListFragment extends Fragment {
         protected Void doInBackground(Context ... contexts) {
             for(Context context : contexts)
                 localContext = context;
-            checkStarter(localContext);
+            DisciplineStorage.get(localContext).resetDb();
+            Log.d("Thread", "Size: " + Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
+            //for(int i = 0; i < 4; i++) {
+            //    if(i == 1)
+            //        continue;
+            //    forcedUpdate = true;
+            //    Log.d("Thread CHECKSTARTER", "SHEET INDEX: " + Integer.toString(i));
+            //    checkStarter(localContext, i);
+            checkStarter(localContext, 0);
+            //}
             return null;
         }
 
@@ -783,7 +798,13 @@ public class SheduleListFragment extends Fragment {
         switch(item.getItemId()) {
             case R.id.refresh_toolbar:
                 swipeRefresh = true;
-                checkStarter(getActivity());
+                //checkStarter(getActivity());
+                AsyncLoader loader = new AsyncLoader();
+                loader.execute(getActivity());
+                return true;
+            case R.id.settings:
+                Intent intent = PrefActivity.newIntent(getActivity(), "general");
+                startActivity(intent);
                 return true;
         }
 

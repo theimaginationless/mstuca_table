@@ -164,6 +164,19 @@ public class DisciplineStorage {
         }
     }
 
+    public Discipline getDiscipleByDate(Date date) {
+        DisciplineCursorWrapper cursor = queryDiscipline(DisciplineTable.Cols.DATE + " = ?",
+                new String[]{Long.toString(date.getTime()).toString()}
+        );
+        try {
+            cursor.moveToFirst();
+            if(cursor.getCount() == 0) return null;
+            return cursor.getDiscipline();
+        } finally {
+            cursor.close();
+        }
+    }
+
     public void addDisciple(Discipline discipline) {
         ContentValues values = getContentValues(discipline);
         mDatabase.insert(DisciplineTable.NAME, null, values);
@@ -180,5 +193,10 @@ public class DisciplineStorage {
         mDatabase.delete(DisciplineTable.NAME, DisciplineTable.Cols.UUID + " = ?",
                 new String[]{discipline.getId().toString()}
         );
+    }
+
+    public void resetDb() {
+        Log.d("DB", "RESET DB!");
+        mDatabase.delete(DisciplineTable.NAME, null, null);
     }
 }

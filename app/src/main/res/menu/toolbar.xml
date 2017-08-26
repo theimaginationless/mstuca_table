@@ -6,4 +6,8 @@
         android:id="@+id/refresh_toolbar"
         android:icon="@drawable/ic_refresh_black_24dp"
         app:showAsAction="always"/>
+    <item
+        android:title="@string/settings"
+        android:id="@+id/settings"
+        app:showAsAction="never"/>
 </menu>

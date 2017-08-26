@@ -10,6 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".SheduleDetailsActivity"></activity>
+        <activity android:name=".PrefActivity"/>
         <activity android:name=".SheduleListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
