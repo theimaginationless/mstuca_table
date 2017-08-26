@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">shedule</string>
+    <string name="waiting_text">Подождите...</string>
+    <string name="waiting_text_funny">Осталось ещё чуть-чуть!</string>
 </resources>

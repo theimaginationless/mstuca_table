@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                                    app:cardElevation="2dp"
+                                    android:foreground="?attr/selectableItemBackground"
+                                    app:cardUseCompatPadding="true"
+                                    android:layout_marginLeft="-3dp"
+                                    android:layout_marginRight="-3dp"
+                                    app:cardCornerRadius="0dp"
+                                    android:layout_marginTop="-3dp"
+                                    android:layout_marginBottom="-3dp"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    xmlns:tools="http://schemas.android.com/tools">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/disciple_name"
+                    style="?android:textAppearanceLarge"
+                    tools:text="Название дисциплины"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:id="@+id/teacherName"
+                    tools:text="Имя преподавателя"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/auditory"
+                    tools:text="Аудитория"/>
+            </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/lecture_type"
+                tools:text="Тип занятия"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/date"
+                tools:text="Дата"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/start_time"
+                    tools:text="Начало"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/end_time"
+                    tools:text="Окончание"/>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+</android.support.v7.widget.CardView>

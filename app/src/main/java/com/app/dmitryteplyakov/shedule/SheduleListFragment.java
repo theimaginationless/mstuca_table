@@ -1,9 +1,12 @@
 package com.app.dmitryteplyakov.shedule;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,10 +22,13 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,6 +36,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -43,21 +50,46 @@ public class SheduleListFragment extends Fragment {
     private SheduleAdapter mAdapter;
     private static String file_url = "http://mstuca.ru/students/schedule/webdav_bizproc_history_get/35345/35345/?force_download=1";
     private static String filename = "shedule.xls";
+    private LinearLayoutManager linearLayoutManager;
+    private RecyclerView.SmoothScroller smoothScroller;
+    boolean dSuccess;
     private ProgressBar mProgressBar;
 
-    private void downloadFile() {
+    private boolean downloadFile() {
         InputStream input = null;
         FileOutputStream output = null;
+        FileInputStream localeShedule = null;
         try {
             URL url = new URL(file_url);
-            input = url.openConnection().getInputStream();
+            URLConnection connection = url.openConnection();
+            input = connection.getInputStream();
+
+            String lastModRemoteString = connection.getHeaderField("Last-Modified");
+            SimpleDateFormat dateformatter = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+            Date lastModRemote = new Date(connection.getLastModified());
+            File localFile = new File(getActivity().getFilesDir() + "/" + filename);
+            Log.d("DW", Boolean.toString(localFile.exists()));
+            if (localFile.exists()) {
+                localeShedule = getActivity().openFileInput(filename);
+                Date lastModLocal = new Date(localFile.lastModified());
+                Log.d("DWNLDR", lastModLocal.toString() + " " + lastModRemote.toString());
+
+                if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
+                    Log.d("DWNLDR", "Data is fresh. Skip downloading...");
+                    return false;
+                }
+            }
+
+
             output = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
 
             int read;
             byte[] data = new byte[1024];
-            while((read = input.read(data)) != -1)  output.write(data, 0, read);
+            while ((read = input.read(data)) != -1) output.write(data, 0, read);
             output.flush();
-        } catch(IOException e) {
+
+            return true;
+        } catch (IOException e) {
             Log.e("SheduleDownloader", "Error IO " + e);
         } finally {
             try {
@@ -65,11 +97,19 @@ public class SheduleListFragment extends Fragment {
                     output.close();
                 if (input != null)
                     input.close();
-            } catch(IOException e) {}
+            } catch (IOException e) {
+            }
         }
+        return true;
+
     }
 
-    private void sheduleReader() {
+    private void sheduleReader(boolean isNew) {
+        if (!isNew) {
+            Log.d("SHDRDR", "Data is fresh. Skip updating...");
+            return;
+        }
+
         DisciplineStorage mDisciples = DisciplineStorage.get(getActivity());
         String disciplineTitle;
         String disciplineType;
@@ -80,27 +120,23 @@ public class SheduleListFragment extends Fragment {
         List<String> parsedStrList = null;
         HSSFWorkbook myShedule = null;
         try {
-        myShedule = new HSSFWorkbook(((getActivity().openFileInput(filename))));
-        } catch(IOException e) {
+            myShedule = new HSSFWorkbook(((getActivity().openFileInput(filename))));
+        } catch (IOException e) {
             Log.e("sheduleReader", "Error read shedule file!");
         }
         HSSFSheet mySheduleSheet = myShedule.getSheetAt(0);
-        mProgressBar.setMax(mySheduleSheet.getLastRowNum());
 
         List<CellRangeAddress> regions = mySheduleSheet.getMergedRegions();
-
-        for(int rowIndex = 1; rowIndex + 3 <= mySheduleSheet.getLastRowNum(); rowIndex++) {
-            if(mySheduleSheet.getRow(rowIndex + 2).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex + 1).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex).getCell(2).getStringCellValue().equals("")) {
-                Log.d("SLF", "EMPTY!");
-                continue;
-            }
-
+        for (int rowIndex = 1; rowIndex + 3 <= mySheduleSheet.getLastRowNum(); rowIndex++) {
+                if (mySheduleSheet.getRow(rowIndex + 2).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex + 1).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex).getCell(2).getStringCellValue().equals("")) {
+                    Log.d("SLF", "EMPTY!");
+                    continue;
+                }
 
 
             //HSSFRow row = mySheduleSheet.getRow(1);
             Discipline discipline = new Discipline();
 
-            mProgressBar.setProgress(rowIndex);
             disciplineTitle = mySheduleSheet.getRow(rowIndex).getCell(2).getStringCellValue();
             disciplineType = mySheduleSheet.getRow(rowIndex + 1).getCell(2).getStringCellValue();
             teacherName = mySheduleSheet.getRow(rowIndex + 1).getCell(4).getStringCellValue();
@@ -121,11 +157,11 @@ public class SheduleListFragment extends Fragment {
             //for(int i = rowIndex; i < )
 
             // Weeks
-            for(CellRangeAddress region : regions) {
-                if(region.isInRange(rowIndex, 1)) {
-                    for(int i = 0; i <= region.getLastRow(); i++) {
+            for (CellRangeAddress region : regions) {
+                if (region.isInRange(rowIndex, 1)) {
+                    for (int i = 0; i <= region.getLastRow(); i++) {
                         Log.d("WEEKTEST", "PRE: " + mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue());
-                        if(mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue().equals(""))
+                        if (mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue().equals(""))
                             continue;
                         week = mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue();
                         break;
@@ -136,11 +172,11 @@ public class SheduleListFragment extends Fragment {
             //int number = (int) mySheduleSheet.getRow(rowIndex).getCell(0).getNumericCellValue();
             int number = 0;
             // Numbers
-            for(CellRangeAddress region : regions) {
-                if(region.isInRange(rowIndex, 0)) {
-                    for(int i = 0; i <= region.getLastRow(); i++) {
+            for (CellRangeAddress region : regions) {
+                if (region.isInRange(rowIndex, 0)) {
+                    for (int i = 0; i <= region.getLastRow(); i++) {
                         Log.d("WEEKTEST", "INDEX: " + Integer.toString(rowIndex) + " PRE: " + (int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue());
-                        if((int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue() == 0)
+                        if ((int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue() == 0)
                             continue;
                         number = (int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue();
                         break;
@@ -149,7 +185,6 @@ public class SheduleListFragment extends Fragment {
             }
 
             Log.d("WEEKTEST", "TITLE: " + disciplineTitle + " WEEK: " + week);
-
 
 
             SimpleDateFormat dateFormatter = null;
@@ -245,7 +280,7 @@ public class SheduleListFragment extends Fragment {
 
                 }
             }
-            if(startCalendar == null)
+            if (startCalendar == null)
                 continue;
             List<Calendar> calendars = new ArrayList<>();
             //Log.d("SLF", "MONTH: " + endCalendar.get(Calendar.MONTH) + 1);
@@ -257,7 +292,7 @@ public class SheduleListFragment extends Fragment {
                 calendars.add(excludeCalendar);
             //for(Calendar calendar : calendars) {
             */
-            if(endCalendar == null)
+            if (endCalendar == null)
                 endCalendar = startCalendar;
             Calendar cal = Calendar.getInstance();
             cal.setTime(new Date());
@@ -266,7 +301,7 @@ public class SheduleListFragment extends Fragment {
             Log.d("TEST", Integer.toString(cal.get(Calendar.DAY_OF_WEEK)));
 
             for (int MONTH = startCalendar.get(Calendar.MONTH); MONTH <= endCalendar.get(Calendar.MONTH); MONTH++) {
-                Log.d("SLF", "MONTH START: " + Integer.toString(MONTH + 1)+ " END: " + Integer.toString(endCalendar.get(Calendar.MONTH) + 1));
+                Log.d("SLF", "MONTH START: " + Integer.toString(MONTH + 1) + " END: " + Integer.toString(endCalendar.get(Calendar.MONTH) + 1));
                 for (int DAY = startCalendar.get(Calendar.DAY_OF_MONTH); DAY <= endCalendar.get(Calendar.DAY_OF_MONTH); DAY++) {
                     Calendar resultCalendar = Calendar.getInstance();
                     //resultCalendar.setTime(new Date());
@@ -282,7 +317,7 @@ public class SheduleListFragment extends Fragment {
                     resultCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
                     Calendar sept = Calendar.getInstance();
                     sept.set(resultCalendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1, 0, 0, 0);
-                    switch((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) - 1) % 2) {
+                    switch ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) - 1) % 2) {
                         case 1:
                             Log.d("WWWW", "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Верхняя");
                             break;
@@ -291,8 +326,8 @@ public class SheduleListFragment extends Fragment {
                             break;
                     }
 
-                    if(excludeCalendar != null)
-                        if(excludeCalendar.get(Calendar.DAY_OF_MONTH) == DAY && excludeCalendar.get(Calendar.MONTH) == MONTH) {
+                    if (excludeCalendar != null)
+                        if (excludeCalendar.get(Calendar.DAY_OF_MONTH) == DAY && excludeCalendar.get(Calendar.MONTH) == MONTH) {
                             Log.d("SLF", "EXCLUDE!" + excludeCalendar.getTime().toString());
                             continue;
                         }
@@ -300,25 +335,25 @@ public class SheduleListFragment extends Fragment {
 
                     //resultCalendar.set(resultCalendar.get(Calendar.YEAR), MONTH, DAY - 1, 0, 0, 0);
                     int weekInt = 2;
-                    if(week.equals("В"))
+                    if (week.equals("В"))
                         weekInt = 1;
-                    else if(week.equals("Н"))
+                    else if (week.equals("Н"))
                         weekInt = 0;
                     int startWeek = startCalendar.get(Calendar.DAY_OF_WEEK);
                     int endWeek = resultCalendar.get(Calendar.DAY_OF_WEEK);
                     Log.d("SLF", "Week compared: Start: " + Integer.toString(startWeek) + " Result: " + Integer.toString(endWeek));
 
-                    if(startWeek == endWeek) {
+                    if (startWeek == endWeek) {
                         Log.d("SLF", "COMPARED! WORKING!");
 
                         Log.d("CAL", Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
-                        if((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2 == weekInt || weekInt == 2) {
+                        if ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2 == weekInt || weekInt == 2) {
                             Log.d("SLF", "TITLE: " + disciplineTitle + " DAY: " + Integer.toString(DAY) + " MONTH: " + Integer.toString(MONTH + 1) + " NUM: " + Integer.toString(number) + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR)));
                             Discipline tempDiscipline = new Discipline();
                             tempDiscipline.setNumber(number);
                             tempDiscipline.setType(disciplineType);
 
-                            switch(number) {
+                            switch (number) {
                                 case 1:
                                     resultCalendar.set(Calendar.HOUR_OF_DAY, 8);
                                     resultCalendar.set(Calendar.MINUTE, 30);
@@ -371,7 +406,7 @@ public class SheduleListFragment extends Fragment {
             //mDisciples.addDisciple(discipline);
             //Log.d("SLF", "STR: " + disciplineTitle + " TYPE: " + disciplineType + " TEACHER: " + teacherName + " AUD: " + aud + " DATE: " + firstDate.toString() + " " + secondDate.toString() + " NUM: " + Integer.toString(number));
             rowIndex += 2;
-            Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 3)+ " NEW: " + Integer.toString(rowIndex));
+            Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 3) + " NEW: " + Integer.toString(rowIndex));
             //break;
         }
     }
@@ -380,49 +415,106 @@ public class SheduleListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_shedule_list, container, false);
-        mProgressBar = (ProgressBar) v.findViewById(R.id.progressbar);
+
         //ProgressBar mProgressBarDownload = (ProgressBar) v.findViewById(R.id.progressBarDownload);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.shedule_list_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        smoothScroller = new LinearSmoothScroller(getActivity()) {
+            @Override
+            protected int getVerticalSnapPreference() {
+                return LinearSmoothScroller.SNAP_TO_START;
+            }
+        };
+        linearLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        dSuccess = false;
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 Log.d("DownloadTask", "Download started!");
-                downloadFile();
+                dSuccess = downloadFile();
             }
         });
-        thread.start();
-        try {
-            thread.join();
+        //thread.start();
+        mProgressBar = getActivity().findViewById(R.id.progressbar);
+        //mProgressBar.setIndeterminate(true);
+        class WorkingOn extends AsyncTask<Void, Void, Void> {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
 
-        } catch(InterruptedException e) {
+            @Override
+            protected Void doInBackground(Void ... params) {
+                sheduleReader(downloadFile());
+                return null;
+            }
 
+            @Override
+            protected void onPostExecute(Void result) {
+                mProgressBar.setVisibility(View.GONE);
+                updateUI();
+            }
         }
-        mProgressBar.setIndeterminate(true);
+
+        /*try {
+            thread.join();
+            mWaitingTextView.setVisibility(View.GONE);
+
+        } catch (InterruptedException e) {
+
+        }*/
         //mProgressBarDownload.setVisibility(View.GONE);
-        Log.d("DownloadTask", "Download finished!");
+        if (dSuccess)
+            Log.d("DownloadTask", "Download finished!");
+        else
+            Log.d("DownloadTask", "Download cancelled!");
         Thread readThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                sheduleReader();
+                sheduleReader(dSuccess);
             }
         });
-        readThread.start();
+        /*readThread.start();
 
         try {
             readThread.join();
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
 
-        }
-        mProgressBar.setEnabled(false);
-        mProgressBar.setVisibility(View.INVISIBLE);
-        updateUI();
-        mRecyclerView.scrollToPosition();
+        }*/
+
+        WorkingOn workingOn = new WorkingOn();
+        workingOn.execute();
+        /*getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                updateUI();
+            }
+        });*/
+
+
+        getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
+                        smoothScroller.setTargetPosition(pos);
+                        linearLayoutManager.startSmoothScroll(smoothScroller);
+                    }
+                });
+            }
+        });
+
         return v;
     }
 
@@ -517,7 +609,7 @@ public class SheduleListFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            if(position != 0) {
+            if (position != 0) {
                 Calendar curr = Calendar.getInstance();
                 curr.setTime(mDisciplines.get(position - 1).getDate());
                 curr.set(Calendar.HOUR_OF_DAY, 0);
@@ -531,8 +623,8 @@ public class SheduleListFragment extends Fragment {
                 after.set(Calendar.MINUTE, 0);
                 after.set(Calendar.SECOND, 0);
                 after.set(Calendar.MILLISECOND, 0);
-                if(!curr.getTime().equals(after.getTime())) {
-                    if(curr.getTime().after(after.getTime()))
+                if (!curr.getTime().equals(after.getTime())) {
+                    if (curr.getTime().after(after.getTime()))
                         return 1;
                     else
                         return 2;
@@ -546,7 +638,7 @@ public class SheduleListFragment extends Fragment {
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) { // Создание представления
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View view = null;
-            switch(viewType) {
+            switch (viewType) {
                 case 2:
                     view = layoutInflater.inflate(R.layout.shedule_list_item_date, parent, false);
                     return new SheduleHolderDate(view);
@@ -564,7 +656,7 @@ public class SheduleListFragment extends Fragment {
         @Override
         public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) { // Замена содержимого View элементами следующих дисциплин
             Discipline discipline = mDisciplines.get(position);
-            switch(holder.getItemViewType()) {
+            switch (holder.getItemViewType()) {
                 case 2:
                     ((SheduleHolderDate) holder).bindShedule(mDisciplines.get(position));
                     break;
@@ -593,6 +685,15 @@ public class SheduleListFragment extends Fragment {
         Collections.sort(disciplines, Discipline.dateComparator);
         mAdapter = new SheduleAdapter(disciplines); // Связывание списка данных с адаптером
         mRecyclerView.setAdapter(mAdapter); // Назначение адаптера к RecyclerView
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
+                smoothScroller.setTargetPosition(pos);
+                linearLayoutManager.startSmoothScroll(smoothScroller);
+            }
+        });
     }
 
 }

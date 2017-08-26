@@ -72,6 +72,43 @@ public class DisciplineStorage {
         return disciplines;
     }
 
+    public int countDisciplinesToDate(Date endD, Date startD) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(endD);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long endDate = calendar.getTime().getTime();
+
+        if(startD != null)
+            calendar.setTime(startD);
+        else {
+            calendar.set(Calendar.MONTH, 8);
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        long startDate = calendar.getTime().getTime();
+
+        if(endDate - startDate < 0)
+            return 0;
+
+        DisciplineCursorWrapper cursor = queryDiscipline("CAST(" + DisciplineTable.Cols.DATE + " AS TEXT) BETWEEN " + "CAST(? AS TEXT) AND " + "CAST(? AS TEXT)",
+                new String[]{Long.toString(startDate), Long.toString(endDate)}
+        );
+
+        try {
+            cursor.moveToFirst();
+            return cursor.getCount();
+        } finally {
+            cursor.close();
+        }
+    }
+
     public List<Discipline> getDisciplinesByDate(Date date) {
         List<Discipline> disciplines = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
