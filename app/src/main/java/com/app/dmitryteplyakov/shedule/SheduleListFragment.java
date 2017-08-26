@@ -588,8 +588,8 @@ public class SheduleListFragment extends Fragment {
             public void onRefresh() {
                 swipeRefresh = true;
                 AsyncLoader loader = new AsyncLoader();
-                loader.execute();
-                loader.doInBackground(getActivity());
+                //loader.doInBackground(getActivity());
+                loader.execute(getActivity());
 
             }
         });
@@ -599,8 +599,9 @@ public class SheduleListFragment extends Fragment {
         //    @Override
         //    public void run() {
                 AsyncLoader loader = new AsyncLoader();
-                loader.execute();
-                loader.doInBackground(getActivity());
+                //loader.doInBackground(getActivity());
+                loader.execute(getActivity());
+
         //    }
         //});
 
