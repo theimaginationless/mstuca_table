@@ -1,5 +1,25 @@
 <resources>
     <string name="app_name">shedule</string>
     <string name="waiting_text">Подождите...</string>
+    <string name="error_connection">Проверьте соединение с интернетом</string>
+    <string name="data_already_fresh">Обновление не требуется</string>
+    <string name="data_updated">Данные обновлены</string>
+    <string name="retry_connecting">Повторить</string>
     <string name="waiting_text_funny">Осталось ещё чуть-чуть!</string>
+    <string name="settings_special">Направление</string>
+    <string name="app_math">Прикладная математика</string>
+    <string name="inform_sys">ЭВМ</string>
+    <string name="course">Курс</string>
+    <array name="courses">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </array>
+    <string name="special">
+        <item>@string/app_math</item>
+        <item>@string/inform_sys</item>
+    </string>
+    <string name="update_toolbar">Обновить</string>
 </resources>

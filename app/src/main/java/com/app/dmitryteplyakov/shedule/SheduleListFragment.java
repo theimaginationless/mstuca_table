@@ -1,15 +1,23 @@
 package com.app.dmitryteplyakov.shedule;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -29,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,6 +63,8 @@ public class SheduleListFragment extends Fragment {
     private RecyclerView.SmoothScroller smoothScroller;
     boolean dSuccess;
     private ProgressBar mProgressBar;
+    private SwipeRefreshLayout mSwipeRefreshData;
+    private boolean swipeRefresh;
 
     private boolean downloadFile() {
         InputStream input = null;
@@ -72,10 +83,12 @@ public class SheduleListFragment extends Fragment {
             if (localFile.exists()) {
                 localeShedule = getActivity().openFileInput(filename);
                 Date lastModLocal = new Date(localFile.lastModified());
-                Log.d("DWNLDR", lastModLocal.toString() + " " + lastModRemote.toString());
+                Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
 
                 if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
-                    Log.d("DWNLDR", "Data is fresh. Skip downloading...");
+                    if(swipeRefresh)
+                        Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
+                    Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
                     return false;
                 }
             }
@@ -87,8 +100,13 @@ public class SheduleListFragment extends Fragment {
             byte[] data = new byte[1024];
             while ((read = input.read(data)) != -1) output.write(data, 0, read);
             output.flush();
-
+            if(swipeRefresh)
+                Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_updated), Snackbar.LENGTH_SHORT).show();
             return true;
+
+        } catch(UnknownHostException e) {
+            Log.e("SLFDownloader", "Wrong address or cannot connecting to internet?", e);
+            return false;
         } catch (IOException e) {
             Log.e("SheduleDownloader", "Error IO " + e);
         } finally {
@@ -97,8 +115,7 @@ public class SheduleListFragment extends Fragment {
                     output.close();
                 if (input != null)
                     input.close();
-            } catch (IOException e) {
-            }
+            } catch (IOException e) {}
         }
         return true;
 
@@ -418,21 +435,13 @@ public class SheduleListFragment extends Fragment {
 
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_shedule_list, container, false);
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
 
-        //ProgressBar mProgressBarDownload = (ProgressBar) v.findViewById(R.id.progressBarDownload);
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.shedule_list_recycler_view);
-
-        smoothScroller = new LinearSmoothScroller(getActivity()) {
-            @Override
-            protected int getVerticalSnapPreference() {
-                return LinearSmoothScroller.SNAP_TO_START;
-            }
-        };
-        linearLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(linearLayoutManager);
+    private void workingOn() {
         dSuccess = false;
 
         Thread thread = new Thread(new Runnable() {
@@ -442,65 +451,101 @@ public class SheduleListFragment extends Fragment {
                 dSuccess = downloadFile();
             }
         });
-        //thread.start();
         mProgressBar = getActivity().findViewById(R.id.progressbar);
-        //mProgressBar.setIndeterminate(true);
-        class WorkingOn extends AsyncTask<Void, Void, Void> {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                mProgressBar.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            protected Void doInBackground(Void ... params) {
-                sheduleReader(downloadFile());
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                mProgressBar.setVisibility(View.GONE);
-                updateUI();
-            }
-        }
-
-        /*try {
-            thread.join();
-            mWaitingTextView.setVisibility(View.GONE);
-
-        } catch (InterruptedException e) {
-
-        }*/
-        //mProgressBarDownload.setVisibility(View.GONE);
-        if (dSuccess)
-            Log.d("DownloadTask", "Download finished!");
-        else
-            Log.d("DownloadTask", "Download cancelled!");
         Thread readThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 sheduleReader(dSuccess);
             }
         });
-        /*readThread.start();
 
+        thread.start();
+
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+
+        }
+        readThread.start();
         try {
             readThread.join();
         } catch (InterruptedException e) {
 
-        }*/
+        }
 
-        WorkingOn workingOn = new WorkingOn();
-        workingOn.execute();
-        /*getActivity().runOnUiThread(new Runnable() {
+        if (dSuccess)
+            Log.d("DownloadTask", "Download finished!");
+        else
+            Log.d("DownloadTask", "Download cancelled!");
+        swipeRefresh = false;
+    }
+
+    private void checkStarter() {
+        if(isOnline()) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    workingOn();
+                }
+            });
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshData.setRefreshing(true);
+                }
+            });
+            thread.start();
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshData.setRefreshing(false);
+                }
+            });
+        } else {
+            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
+        }
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 updateUI();
             }
-        });*/
+        });
 
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshData.setRefreshing(false);
+            }
+        });
+        Log.d("SLF", "Connection state: " + Boolean.toString(isOnline()));
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_shedule_list, container, false);
+        setHasOptionsMenu(true);
+        //ProgressBar mProgressBarDownload = (ProgressBar) v.findViewById(R.id.progressBarDownload);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.shedule_list_recycler_view);
+        mSwipeRefreshData = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
+        smoothScroller = new LinearSmoothScroller(getActivity()) {
+            @Override
+            protected int getVerticalSnapPreference() {
+                return LinearSmoothScroller.SNAP_TO_START;
+            }
+        };
+        linearLayoutManager = new LinearLayoutManager(getActivity());
+
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+
+        mSwipeRefreshData.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                checkStarter();
+                swipeRefresh = true;
+            }
+        });
+
+        checkStarter();
         getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -508,8 +553,9 @@ public class SheduleListFragment extends Fragment {
                     @Override
                     public void run() {
                         int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
-                        smoothScroller.setTargetPosition(pos);
-                        linearLayoutManager.startSmoothScroll(smoothScroller);
+                        //smoothScroller.setTargetPosition(pos);
+                        //linearLayoutManager.startSmoothScroll(smoothScroller);
+                        linearLayoutManager.scrollToPositionWithOffset(pos, 0);
                     }
                 });
             }
@@ -607,6 +653,10 @@ public class SheduleListFragment extends Fragment {
             mDisciplines = disciplines;
         }
 
+        public void setDisciplines(List<Discipline> disciplines) {
+            mDisciplines = disciplines;
+        }
+
         @Override
         public int getItemViewType(int position) {
             if (position != 0) {
@@ -679,21 +729,47 @@ public class SheduleListFragment extends Fragment {
         //List<Discipline> disciplines = DisciplineStorage.get(getActivity()).getDisciplines();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.set(Calendar.MONTH, 8);
-        calendar.set(Calendar.DAY_OF_MONTH, 2);
+        //calendar.set(Calendar.MONTH, 8);
+        //calendar.set(Calendar.DAY_OF_MONTH, 2);
         List<Discipline> disciplines = DisciplineStorage.get(getActivity()).getDisciplines();
         Collections.sort(disciplines, Discipline.dateComparator);
-        mAdapter = new SheduleAdapter(disciplines); // Связывание списка данных с адаптером
-        mRecyclerView.setAdapter(mAdapter); // Назначение адаптера к RecyclerView
+        if(mAdapter == null) {
+            mAdapter = new SheduleAdapter(disciplines); // Связывание списка данных с адаптером
+            mAdapter.setHasStableIds(true);
+            mRecyclerView.setAdapter(mAdapter); // Назначение адаптера к RecyclerView
+        } else {
+            mAdapter.setDisciplines(disciplines);
+            mAdapter.notifyDataSetChanged();
+        }
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+
                 int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
-                smoothScroller.setTargetPosition(pos);
-                linearLayoutManager.startSmoothScroll(smoothScroller);
+                //smoothScroller.setTargetPosition(pos);
+                //linearLayoutManager.startSmoothScroll(smoothScroller);
+                linearLayoutManager.scrollToPositionWithOffset(pos, 0);
             }
         });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolbar, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.refresh_toolbar:
+                swipeRefresh = true;
+                checkStarter();
+                return true;
+        }
+
+        return onOptionsItemSelected(item);
     }
 
 }
