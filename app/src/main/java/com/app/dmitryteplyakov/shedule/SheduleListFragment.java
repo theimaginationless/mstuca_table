@@ -482,49 +482,10 @@ public class SheduleListFragment extends Fragment {
     private void checkStarter(Context mContext) {
         Thread thread = null;
         if(isOnline()) {
-            //thread = new Thread(new Runnable() {
-            //    @Override
-            //    public void run() {
-                    workingOn(mContext);
-            //    }
-            //});
-            //getActivity().runOnUiThread(new Runnable() {
-            //    @Override
-            //    public void run() {
-  //                  mSwipeRefreshData.setRefreshing(true);
-            //    }
-            //});
-            //thread.start();
-            //getActivity().runOnUiThread(new Runnable() {
-            //   @Override
-            //    public void run() {
-//                    mSwipeRefreshData.setRefreshing(false);
-            //    }
-            //});
+            workingOn(mContext);
         } else {
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
         }
-        //if(thread != null) {
-        //    try {
-        //        thread.join();
-        //    } catch(InterruptedException e) {
-        //        Log.e("SLF", "Exception preUpdateView", e);
-        //    }
-        //}
-        //getActivity().runOnUiThread(new Runnable() {
-        //    @Override
-        //    public void run() {
-        //
-        //        updateUI();
-        //    }
-        //});
-
-        //getActivity().runOnUiThread(new Runnable() {
-        //    @Override
-        //    public void run() {
-        //        mSwipeRefreshData.setRefreshing(false);
-        //    }
-        //});
         Log.d("SLF", "Connection state: " + Boolean.toString(isOnline()));
     }
 
@@ -588,23 +549,14 @@ public class SheduleListFragment extends Fragment {
             public void onRefresh() {
                 swipeRefresh = true;
                 AsyncLoader loader = new AsyncLoader();
-                //loader.doInBackground(getActivity());
                 loader.execute(getActivity());
 
             }
         });
 
-        //checkStarter();
-        //getActivity().runOnUiThread(new Runnable() {
-        //    @Override
-        //    public void run() {
-                AsyncLoader loader = new AsyncLoader();
-                //loader.doInBackground(getActivity());
-                loader.execute(getActivity());
 
-        //    }
-        //});
-
+        AsyncLoader loader = new AsyncLoader();
+        loader.execute(getActivity());
         getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -612,9 +564,9 @@ public class SheduleListFragment extends Fragment {
                     @Override
                     public void run() {
                         int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
-                        //smoothScroller.setTargetPosition(pos);
-                        //linearLayoutManager.startSmoothScroll(smoothScroller);
-                        linearLayoutManager.scrollToPositionWithOffset(pos, 0);
+                        smoothScroller.setTargetPosition(pos);
+                        linearLayoutManager.startSmoothScroll(smoothScroller);
+                        //linearLayoutManager.scrollToPositionWithOffset(pos, 0);
                     }
                 });
             }
