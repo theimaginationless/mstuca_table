@@ -164,6 +164,19 @@ public class DisciplineStorage {
         }
     }
 
+    public Discipline getDiscipleByNumber(int num) {
+        DisciplineCursorWrapper cursor = queryDiscipline("_id" + " = ?",
+                new String[]{Integer.toString(num)}
+        );
+        try {
+            cursor.moveToFirst();
+            if(cursor.getCount() == 0) return null;
+            return cursor.getDiscipline();
+        } finally {
+            cursor.close();
+        }
+    }
+
     public Discipline getDiscipleByDate(Date date) {
         DisciplineCursorWrapper cursor = queryDiscipline(DisciplineTable.Cols.DATE + " = ?",
                 new String[]{Long.toString(date.getTime()).toString()}
