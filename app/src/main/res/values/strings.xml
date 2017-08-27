@@ -23,4 +23,5 @@
     </array>
     <string name="update_toolbar">Обновить</string>
     <string name="check_update_when_start">Проверять обновление расписания при запуске</string>
+    <string name="about">Developed by Dmitry Teplyakov</string>
 </resources>
