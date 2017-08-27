@@ -63,10 +63,11 @@ public class SheduleListFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     private RecyclerView.SmoothScroller smoothScroller;
     boolean dSuccess;
-    private ProgressBar mProgressBar;
+    private String EXTRA_SAVED;
     private SwipeRefreshLayout mSwipeRefreshData;
     private boolean swipeRefresh;
     private boolean forcedUpdate;
+    private boolean notFirstRun;
 
     private boolean downloadFile(Context mContext) {
         InputStream input = null;
@@ -438,6 +439,9 @@ public class SheduleListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState != null) {
+            notFirstRun = (boolean) savedInstanceState.getSerializable(EXTRA_SAVED);
+        }
 
     }
 
@@ -576,19 +580,25 @@ public class SheduleListFragment extends Fragment {
         getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
-                        smoothScroller.setTargetPosition(pos);
-                        linearLayoutManager.startSmoothScroll(smoothScroller);
-                        //linearLayoutManager.scrollToPositionWithOffset(pos, 0);
-                    }
-                });
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
+                            smoothScroller.setTargetPosition(pos);
+                            linearLayoutManager.startSmoothScroll(smoothScroller);
+                            //linearLayoutManager.scrollToPositionWithOffset(pos, 0);
+                        }
+                    });
             }
         });
 
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putSerializable(EXTRA_SAVED, notFirstRun);
     }
 
     // Реализация адаптера
@@ -775,17 +785,18 @@ public class SheduleListFragment extends Fragment {
             mAdapter.setDisciplines(disciplines);
             mAdapter.notifyDataSetChanged();
         }
-
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
-                //smoothScroller.setTargetPosition(pos);
-                //linearLayoutManager.startSmoothScroll(smoothScroller);
-                linearLayoutManager.scrollToPositionWithOffset(pos, 0);
-            }
-        });
+        if(!notFirstRun) {
+            notFirstRun = true;
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
+                    //smoothScroller.setTargetPosition(pos);
+                    //linearLayoutManager.startSmoothScroll(smoothScroller);
+                    linearLayoutManager.scrollToPositionWithOffset(pos, 0);
+                }
+            });
+        }
     }
 
     @Override
