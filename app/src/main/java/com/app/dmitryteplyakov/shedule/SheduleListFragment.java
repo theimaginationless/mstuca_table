@@ -278,17 +278,17 @@ public class SheduleListFragment extends Fragment {
                             arrayParts.add(firstPart.substring(firstI, i + 1));
                     }
                     for (String str : arrayParts) {
-                        Log.d("SLF", "UNIQ: " + str);
+                        Log.d("SLF", "STR FOR ONCE CALENDARS: " + str);
                         Calendar onceCal = Calendar.getInstance();
-                        onceCal.setTime(firstDate);
+                        //onceCal.setTime(firstDate);
+                        Date current = dateFormatter.parse(str);
+                        onceCal.setTime(current);
                         onceCal.set(Calendar.YEAR, year.get(Calendar.YEAR));
                         onceCal.setFirstDayOfWeek(Calendar.MONDAY);
                         onceCal.set(Calendar.HOUR_OF_DAY, 0);
                         onceCal.set(Calendar.MINUTE, 0);
                         onceCal.set(Calendar.SECOND, 0);
                         onceCal.set(Calendar.MILLISECOND, 0);
-                        Date current = dateFormatter.parse(str);
-                        onceCal.setTime(current);
                         onceCalendars.add(onceCal);
                     }
                 }
@@ -326,9 +326,42 @@ public class SheduleListFragment extends Fragment {
 
                 }
             }
+            boolean isExclude = false;
             if (!exclusePart.equals("")) {
                 dateFormatter.applyPattern("dd.MM");
                 try {
+                    //if(exclusePart.contains(";")) {
+                        int firstI = 0;
+                        List<String> arrayParts = new ArrayList<>();
+                        for (int i = 0; i < firstPart.length(); i++) {
+                            if(firstPart.charAt(i) == ';') {
+                                arrayParts.add(firstPart.substring(firstI, i));
+                                firstI = i + 1;
+                            }
+                            if(i == firstPart.length() - 1)
+                                arrayParts.add(firstPart.substring(firstI, i + 1));
+                        }
+                        for (String str : arrayParts) {
+                            Log.d("SLF", "STR FOR EXCL CALENDARS: " + str);
+
+                            Calendar exclCal = Calendar.getInstance();
+                            //onceCal.setTime(firstDate);
+                            Date current = dateFormatter.parse(str);
+                            exclCal.setTime(current);
+                            exclCal.set(Calendar.YEAR, year.get(Calendar.YEAR));
+                            exclCal.setFirstDayOfWeek(Calendar.MONDAY);
+                            exclCal.set(Calendar.HOUR_OF_DAY, 0);
+                            exclCal.set(Calendar.MINUTE, 0);
+                            exclCal.set(Calendar.SECOND, 0);
+                            exclCal.set(Calendar.MILLISECOND, 0);
+                            onceCalendars.add(exclCal);
+                        }
+                        if(arrayParts.size() != 0)
+                            isExclude = true;
+                    //}
+
+
+
                     excludeDate = dateFormatter.parse(exclusePart);
                     excludeCalendar = Calendar.getInstance();
                     excludeCalendar.setTime(excludeDate);
@@ -365,133 +398,154 @@ public class SheduleListFragment extends Fragment {
             Log.d("TEST", Integer.toString(cal.get(Calendar.DAY_OF_WEEK)));
             int diffCount = 0;
             boolean firstMonth = true;
-            for (int MONTH = startCalendar.get(Calendar.MONTH); MONTH <= endCalendar.get(Calendar.MONTH); MONTH++) {
-                Log.d("SLF", "MONTH START: " + Integer.toString(MONTH + 1) + " MONTH END: " + Integer.toString(endCalendar.get(Calendar.MONTH) + 1));
-                /*int startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
-                int endDay = startCalendar.getActualMaximum(Calendar.MONTH);*/
-                int startDay;
-                int endDay;
-                Log.d("SLF", "FIRST MONTH: " + Boolean.toString(firstMonth));
-                if(firstMonth) {
-                    startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
-                } else {
-                    startDay = startCalendar.getActualMinimum(Calendar.DAY_OF_MONTH);
+
+            int countDates = 1;
+            if(onceCalendars.size() != 0)
+                countDates = onceCalendars.size();
+            for(int i = 0; i < countDates; i++) {
+                firstMonth = true;
+                int startMonth = startCalendar.get(Calendar.MONTH);
+                int endMonth = endCalendar.get(Calendar.MONTH);
+                if(onceCalendars.size() != 0) {
+
+                    startCalendar = onceCalendars.get(i);
+                    endCalendar = onceCalendars.get(i);
+                    startMonth = onceCalendars.get(i).get(Calendar.MONTH);
+                    endMonth = onceCalendars.get(i).get(Calendar.MONTH);
+                    Log.d("SLF EXPERIMENTAL", "STARTMONTH: " + Integer.toString(startMonth + 1) + " ENDMONTH: " + Integer.toString(endMonth + 1));
                 }
-                endDay = startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-                if(startCalendar.get(Calendar.MONTH) == endCalendar.get(Calendar.MONTH)) {
+                for (int MONTH = startCalendar.get(Calendar.MONTH); MONTH <= endCalendar.get(Calendar.MONTH); MONTH++) {
 
-                    startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
-                    endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
-                    Log.d("SLF", "ТОЛЬКО ОДИН МЕСЯЦ ИЛИ ОДИН ДЕНЬ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
-                } else if(MONTH == endCalendar.get(Calendar.MONTH)) {
-                    startDay = startCalendar.getActualMinimum(Calendar.DAY_OF_MONTH);
-                    endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
-                    Log.d("SLF", "ПОСЛЕДНИЙ МЕСЯЦ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
-                } else
-                    Log.d("SLF", "ПЕРИОД! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
-                Log.d("SLF", "DAY START THIS MONTH: " + Integer.toString(startDay) + " DAY END THIS MONTH: " + Integer.toString(endDay));
-                firstMonth = false;
-                for (int DAY = /*startCalendar.get(Calendar.DAY_OF_MONTH)*/ startDay; DAY <= /*endCalendar.get(Calendar.DAY_OF_MONTH)*/ endDay; DAY++) {
-                    Calendar resultCalendar = Calendar.getInstance();
-                    //resultCalendar.setTime(new Date());
-                    diffCount++;
-                    resultCalendar.set(Calendar.HOUR_OF_DAY, 0);
-                    resultCalendar.set(Calendar.MINUTE, 0);
-                    resultCalendar.set(Calendar.SECOND, 0);
-                    resultCalendar.set(Calendar.MILLISECOND, 0);
-
-                    resultCalendar.setFirstDayOfWeek(Calendar.MONDAY);
-                    resultCalendar.set(Calendar.MONTH, MONTH);
-                    resultCalendar.set(Calendar.DAY_OF_MONTH, DAY);
-                    resultCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
-                    Calendar sept = Calendar.getInstance();
-                    sept.set(resultCalendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1, 0, 0, 0);
-                    switch ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2) {
-                        case 1:
-                            Log.d("WWWW", "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Верхняя");
-                            break;
-                        case 0:
-                            Log.d("WWWW", "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Нижняя");
-                            break;
+                    Log.d("SLF", "MONTH START: " + Integer.toString(MONTH + 1) + " MONTH END: " + Integer.toString(endCalendar.get(Calendar.MONTH) + 1));
+                    int startDay;
+                    int endDay;
+                    Calendar tempStart = Calendar.getInstance();
+                    tempStart.set(Calendar.MONTH, MONTH);
+                    Calendar tempEnd = Calendar.getInstance();
+                    tempEnd.set(Calendar.MONTH, MONTH);
+                    Log.d("SLF", "FIRST MONTH: " + Boolean.toString(firstMonth));
+                    if (firstMonth) {
+                        startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
+                    } else {
+                        startDay = tempStart.getActualMinimum(Calendar.DAY_OF_MONTH);
                     }
+                    endDay = tempStart.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    if (startCalendar.get(Calendar.MONTH) == endCalendar.get(Calendar.MONTH)) {
+                        startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
+                        endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
+                        Log.d("SLF", "ТОЛЬКО ОДИН МЕСЯЦ ИЛИ ОДИН ДЕНЬ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                    } else if (MONTH == endCalendar.get(Calendar.MONTH)) {
+                        startDay = tempStart.getActualMinimum(Calendar.DAY_OF_MONTH);
+                        endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
+                        Log.d("SLF", "ПОСЛЕДНИЙ МЕСЯЦ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                    } else {
+                        Log.d("SLF", "ПЕРИОД! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                    }
+                    Log.d("SLF", "DAY START THIS MONTH: " + Integer.toString(startDay) + " DAY END THIS MONTH: " + Integer.toString(endDay));
+                    firstMonth = false;
+                    for (int DAY = startDay; DAY <= endDay; DAY++) {
+                        Calendar resultCalendar = Calendar.getInstance();
+                        //resultCalendar.setTime(new Date());
+                        diffCount++;
+                        resultCalendar.set(Calendar.HOUR_OF_DAY, 0);
+                        resultCalendar.set(Calendar.MINUTE, 0);
+                        resultCalendar.set(Calendar.SECOND, 0);
+                        resultCalendar.set(Calendar.MILLISECOND, 0);
 
-                    if (excludeCalendar != null)
-                        if ((int) excludeCalendar.get(Calendar.DAY_OF_MONTH) == DAY && (int) excludeCalendar.get(Calendar.MONTH) == MONTH) {
-                            Log.d("SLF", "EXCLUDE!" + excludeCalendar.getTime().toString() + " TITLE: " + disciplineTitle);
-                            continue;
+                        resultCalendar.setFirstDayOfWeek(Calendar.MONDAY);
+                        resultCalendar.set(Calendar.MONTH, MONTH);
+                        resultCalendar.set(Calendar.DAY_OF_MONTH, DAY);
+                        resultCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
+                        Calendar sept = Calendar.getInstance();
+                        sept.set(resultCalendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1, 0, 0, 0);
+                        switch ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2) {
+                            case 1:
+                                Log.d("WWWW", "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Верхняя");
+                                break;
+                            case 0:
+                                Log.d("WWWW", "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Нижняя");
+                                break;
                         }
 
-
-                    //resultCalendar.set(resultCalendar.get(Calendar.YEAR), MONTH, DAY - 1, 0, 0, 0);
-                    int weekInt = 2;
-                    if (week.equals("В"))
-                        weekInt = 1;
-                    else if (week.equals("Н"))
-                        weekInt = 0;
-                    int startWeek = startCalendar.get(Calendar.DAY_OF_WEEK);
-                    int endWeek = resultCalendar.get(Calendar.DAY_OF_WEEK);
-                    Log.d("SLF", "Week compared: Start: " + Integer.toString(startWeek) + " Result: " + Integer.toString(endWeek));
-
-                    if (startWeek == endWeek) {
-                        Log.d("SLF", "COMPARED! WORKING!");
-
-                        Log.d("CAL", Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
-                        if ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2 == weekInt || weekInt == 2) {
-                            Log.d("SLF", "TITLE: " + disciplineTitle + " DAY: " + Integer.toString(DAY) + " MONTH: " + Integer.toString(MONTH + 1) + " NUM: " + Integer.toString(number) + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR)));
-                            Discipline tempDiscipline = new Discipline();
-                            tempDiscipline.setNumber(number);
-                            tempDiscipline.setType(disciplineType);
-
-                            switch (number) {
-                                case 1:
-                                    resultCalendar.set(Calendar.HOUR_OF_DAY, 8);
-                                    resultCalendar.set(Calendar.MINUTE, 30);
-                                    break;
-                                case 2:
-                                    resultCalendar.set(Calendar.HOUR_OF_DAY, 10);
-                                    resultCalendar.set(Calendar.MINUTE, 10);
-                                    break;
-                                case 3:
-                                    resultCalendar.set(Calendar.HOUR_OF_DAY, 12);
-                                    resultCalendar.set(Calendar.MINUTE, 20);
-                                    break;
-                                case 4:
-                                    resultCalendar.set(Calendar.HOUR_OF_DAY, 14);
-                                    resultCalendar.set(Calendar.MINUTE, 00);
-                                    break;
-                                case 5:
-                                    resultCalendar.set(Calendar.HOUR_OF_DAY, 15);
-                                    resultCalendar.set(Calendar.MINUTE, 55);
-                                    break;
-                                case 6:
-                                    resultCalendar.set(Calendar.HOUR_OF_DAY, 17);
-                                    resultCalendar.set(Calendar.MINUTE, 35);
-                                    break;
-                                case 7:
-                                    resultCalendar.set(Calendar.HOUR_OF_DAY, 19);
-                                    resultCalendar.set(Calendar.MINUTE, 15);
-                                    break;
-                                default:
-                                    Log.e("SLF", "Error getting number! IndexRow: " + rowIndex, new Exception());
-                                    break;
+                        //if (excludeCalendar != null)
+                        if(isExclude)
+                            if ((int) onceCalendars.get(i).get(Calendar.DAY_OF_MONTH) == DAY && (int) onceCalendars.get(i).get(Calendar.MONTH) == MONTH) {
+                                Log.d("SLF", "EXCLUDE!" + onceCalendars.get(i).getTime().toString() + " TITLE: " + disciplineTitle);
+                                continue;
                             }
 
-                            tempDiscipline.setDate(resultCalendar.getTime());
-                            Log.d("TTT", resultCalendar.getTime().toString());
-                            tempDiscipline.setAuditoryNumber(aud);
-                            tempDiscipline.setDiscipleName(disciplineTitle);
-                            tempDiscipline.setTeacherName(teacherName);
-                            Log.d("RESULT_ADD", "TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR)));
 
-                            DisciplineStorage.get(getActivity()).addDisciple(tempDiscipline);
+                        //resultCalendar.set(resultCalendar.get(Calendar.YEAR), MONTH, DAY - 1, 0, 0, 0);
+                        int weekInt = 2;
+                        if (week.equals("В"))
+                            weekInt = 1;
+                        else if (week.equals("Н"))
+                            weekInt = 0;
+                        int startWeek = startCalendar.get(Calendar.DAY_OF_WEEK);
+                        int endWeek = resultCalendar.get(Calendar.DAY_OF_WEEK);
+                        Log.d("SLF", "Week compared: Start: " + Integer.toString(startWeek) + " Result: " + Integer.toString(endWeek));
+
+                        if (startWeek == endWeek) {
+                            Log.d("SLF", "COMPARED! WORKING!");
+
+                            Log.d("CAL", Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) + " DISCIPLINE CAL: " + Integer.toString(weekInt));
+                            if ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2 == weekInt || weekInt == 2) {
+                                Log.d("SLF", "TITLE: " + disciplineTitle + " DAY: " + Integer.toString(DAY) + " MONTH: " + Integer.toString(MONTH + 1) + " NUM: " + Integer.toString(number) + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) + " CURRENT DAY: " + Integer.toString(DAY));
+                                Discipline tempDiscipline = new Discipline();
+                                tempDiscipline.setNumber(number);
+                                tempDiscipline.setType(disciplineType);
+
+                                switch (number) {
+                                    case 1:
+                                        resultCalendar.set(Calendar.HOUR_OF_DAY, 8);
+                                        resultCalendar.set(Calendar.MINUTE, 30);
+                                        break;
+                                    case 2:
+                                        resultCalendar.set(Calendar.HOUR_OF_DAY, 10);
+                                        resultCalendar.set(Calendar.MINUTE, 10);
+                                        break;
+                                    case 3:
+                                        resultCalendar.set(Calendar.HOUR_OF_DAY, 12);
+                                        resultCalendar.set(Calendar.MINUTE, 20);
+                                        break;
+                                    case 4:
+                                        resultCalendar.set(Calendar.HOUR_OF_DAY, 14);
+                                        resultCalendar.set(Calendar.MINUTE, 00);
+                                        break;
+                                    case 5:
+                                        resultCalendar.set(Calendar.HOUR_OF_DAY, 15);
+                                        resultCalendar.set(Calendar.MINUTE, 55);
+                                        break;
+                                    case 6:
+                                        resultCalendar.set(Calendar.HOUR_OF_DAY, 17);
+                                        resultCalendar.set(Calendar.MINUTE, 35);
+                                        break;
+                                    case 7:
+                                        resultCalendar.set(Calendar.HOUR_OF_DAY, 19);
+                                        resultCalendar.set(Calendar.MINUTE, 15);
+                                        break;
+                                    default:
+                                        Log.e("SLF", "Error getting number! IndexRow: " + rowIndex, new Exception());
+                                        break;
+                                }
+
+                                tempDiscipline.setDate(resultCalendar.getTime());
+                                Log.d("TTT", resultCalendar.getTime().toString());
+                                tempDiscipline.setAuditoryNumber(aud);
+                                tempDiscipline.setDiscipleName(disciplineTitle);
+                                tempDiscipline.setTeacherName(teacherName);
+                                Log.d("RESULT_ADD", "TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
+
+                                DisciplineStorage.get(getActivity()).addDisciple(tempDiscipline);
+                            } else
+                                continue;
                         } else
                             continue;
-                    } else
-                        continue;
+                    }
                 }
+                Log.d("SLF", "COUNTER DAYS: " + Integer.toString(diffCount));
+                //}
             }
-            Log.d("SLF", "COUNTER DAYS: " + Integer.toString(diffCount));
-            //}
 
             //mDisciples.addDisciple(discipline);
             //Log.d("SLF", "STR: " + disciplineTitle + " TYPE: " + disciplineType + " TEACHER: " + teacherName + " AUD: " + aud + " DATE: " + firstDate.toString() + " " + secondDate.toString() + " NUM: " + Integer.toString(number));
@@ -509,6 +563,8 @@ public class SheduleListFragment extends Fragment {
         if(savedInstanceState != null) {
             notFirstRun = (boolean) savedInstanceState.getSerializable(EXTRA_SAVED);
         }
+        setRetainInstance(true);
+
 
     }
 
@@ -871,7 +927,7 @@ public class SheduleListFragment extends Fragment {
         List<Discipline> disciplines = DisciplineStorage.get(mContext).getDisciplines();
         Collections.sort(disciplines, Discipline.dateComparator);
         Log.d("DEBUG", Integer.toString(disciplines.size()));
-        if(mAdapter == null) {
+        if(mRecyclerView.getAdapter() == null || mAdapter == null) {
             mAdapter = new SheduleAdapter(disciplines); // Связывание списка данных с адаптером
             //mAdapter.setHasStableIds(true);
             mRecyclerView.setAdapter(mAdapter); // Назначение адаптера к RecyclerView
