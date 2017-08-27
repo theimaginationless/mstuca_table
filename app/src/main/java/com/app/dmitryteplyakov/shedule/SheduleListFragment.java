@@ -15,9 +15,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -72,7 +74,9 @@ public class SheduleListFragment extends Fragment {
     private boolean swipeRefresh;
     private boolean forcedUpdate;
     private boolean notFirstRun;
+    private LinearLayoutManager gridLayoutManager;
     private boolean onceDiscipline;
+
 
     private boolean downloadFile(Context mContext) {
         InputStream input = null;
@@ -345,9 +349,10 @@ public class SheduleListFragment extends Fragment {
                 }
                 endDay = startCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
                 if(startCalendar.get(Calendar.MONTH) == endCalendar.get(Calendar.MONTH)) {
+
                     startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
                     endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
-                    Log.d("SLF", "ТОЛЬКО ОДИН МЕСЯЦ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                    Log.d("SLF", "ТОЛЬКО ОДИН МЕСЯЦ ИЛИ ОДИН ДЕНЬ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
                 } else if(MONTH == endCalendar.get(Calendar.MONTH)) {
                     startDay = startCalendar.getActualMinimum(Calendar.DAY_OF_MONTH);
                     endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
@@ -606,7 +611,6 @@ public class SheduleListFragment extends Fragment {
             }
         };
         linearLayoutManager = new LinearLayoutManager(getActivity());
-
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
         mSwipeRefreshData.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -639,8 +643,9 @@ public class SheduleListFragment extends Fragment {
                         public void run() {
                             int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
                             smoothScroller.setTargetPosition(pos);
-                            linearLayoutManager.startSmoothScroll(smoothScroller);
-                            //linearLayoutManager.scrollToPositionWithOffset(pos, 0);
+                            //linearLayoutManager.startSmoothScroll(smoothScroller);
+                            //gridLayoutManager.startSmoothScroll(smoothScroller);
+                            linearLayoutManager.scrollToPositionWithOffset(pos, 0);
                         }
                     });
             }
@@ -853,6 +858,7 @@ public class SheduleListFragment extends Fragment {
                     //smoothScroller.setTargetPosition(pos);
                     //linearLayoutManager.startSmoothScroll(smoothScroller);
                     linearLayoutManager.scrollToPositionWithOffset(pos, 0);
+
                 }
             });
         }
