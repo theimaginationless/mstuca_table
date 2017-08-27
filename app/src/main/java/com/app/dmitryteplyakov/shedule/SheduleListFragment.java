@@ -224,6 +224,9 @@ public class SheduleListFragment extends Fragment {
             Date firstDate = null;
             Date secondDate = null;
             Date excludeDate = null;
+            List<Calendar> onceCalendars = new ArrayList<>();
+
+
             if (dateRange.contains("с ")) {
                 if (dateRange.contains("кроме")) {
                     date = dateRange.replaceFirst("     с ", "").replace(" по ", "|").replace("       кроме ", "|");
@@ -263,6 +266,33 @@ public class SheduleListFragment extends Fragment {
             Calendar excludeCalendar = null;
 
             try {
+                if(secondPart.equals("") && firstPart.contains(";")) {
+                    int firstI = 0;
+                    List<String> arrayParts = new ArrayList<>();
+                    for (int i = 0; i < firstPart.length(); i++) {
+                        if(firstPart.charAt(i) == ';') {
+                            arrayParts.add(firstPart.substring(firstI, i));
+                            firstI = i + 1;
+                        }
+                        if(i == firstPart.length() - 1)
+                            arrayParts.add(firstPart.substring(firstI, i + 1));
+                    }
+                    for (String str : arrayParts) {
+                        Log.d("SLF", "UNIQ: " + str);
+                        Calendar onceCal = Calendar.getInstance();
+                        onceCal.setTime(firstDate);
+                        onceCal.set(Calendar.YEAR, year.get(Calendar.YEAR));
+                        onceCal.setFirstDayOfWeek(Calendar.MONDAY);
+                        onceCal.set(Calendar.HOUR_OF_DAY, 0);
+                        onceCal.set(Calendar.MINUTE, 0);
+                        onceCal.set(Calendar.SECOND, 0);
+                        onceCal.set(Calendar.MILLISECOND, 0);
+                        Date current = dateFormatter.parse(str);
+                        onceCal.setTime(current);
+                        onceCalendars.add(onceCal);
+                    }
+                }
+
                 firstDate = dateFormatter.parse(firstPart);
             } catch (ParseException e) {
             }
@@ -316,7 +346,7 @@ public class SheduleListFragment extends Fragment {
             }
             if (startCalendar == null)
                 continue;
-            List<Calendar> calendars = new ArrayList<>();
+
             //Log.d("SLF", "MONTH: " + endCalendar.get(Calendar.MONTH) + 1);
             //Log.d("SLF", "DAY: " + endCalendar.get(Calendar.DAY_OF_MONTH));
             /*calendars.add(startCalendar);
