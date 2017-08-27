@@ -379,7 +379,7 @@ public class SheduleListFragment extends Fragment {
                     }
 
                     if (excludeCalendar != null)
-                        if (excludeCalendar.get(Calendar.DAY_OF_MONTH) == DAY && excludeCalendar.get(Calendar.MONTH) == MONTH) {
+                        if ((int) excludeCalendar.get(Calendar.DAY_OF_MONTH) == DAY && (int) excludeCalendar.get(Calendar.MONTH) == MONTH) {
                             Log.d("SLF", "EXCLUDE!" + excludeCalendar.getTime().toString() + " TITLE: " + disciplineTitle);
                             continue;
                         }
