@@ -96,14 +96,8 @@ public class SheduleListFragment extends Fragment {
                     Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
 
                     if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
-                        if (swipeRefresh) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
+                        if (swipeRefresh)
+                            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
                         Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
                         return false;
                     }
@@ -565,12 +559,7 @@ public class SheduleListFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                  mSwipeRefreshData.setRefreshing(true);
-                }
-            });
+            mSwipeRefreshData.setRefreshing(true);
             super.onPreExecute();
 
         }
@@ -595,13 +584,9 @@ public class SheduleListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             Log.d("AsyncLoader", "Thread closed.");
-            ((AppCompatActivity)localContext).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshData.setRefreshing(false);
-                }
-            });
+
             updateUI(localContext);
+            mSwipeRefreshData.setRefreshing(false);
 
             Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
