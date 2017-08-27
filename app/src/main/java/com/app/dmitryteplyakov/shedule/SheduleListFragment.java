@@ -96,8 +96,14 @@ public class SheduleListFragment extends Fragment {
                     Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
 
                     if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
-                        if (swipeRefresh)
-                            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
+                        if (swipeRefresh) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
                         Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
                         return false;
                     }
