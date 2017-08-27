@@ -499,6 +499,18 @@ public class SheduleListFragment extends Fragment {
         Log.d("SLF", "Connection state: " + Boolean.toString(isOnline()));
     }
 
+    private class AsyncUpdater extends AsyncTask<Context, Void, Void> {
+        private Context localContext;
+
+        @Override
+        protected Void doInBackground(Context ... contexts) {
+            for(Context context : contexts)
+                localContext = context;
+            updateUI(localContext);
+            return null;
+        }
+    }
+
     private class AsyncLoader extends AsyncTask<Context, Void, Void> {
         private Context localContext;
 
@@ -573,9 +585,14 @@ public class SheduleListFragment extends Fragment {
             }
         });
 
+        if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
+            AsyncLoader loader = new AsyncLoader();
+            loader.execute(getActivity());
+        } else {
+            AsyncUpdater updater = new AsyncUpdater();
+            updater.execute(getActivity());
+        }
 
-        AsyncLoader loader = new AsyncLoader();
-        loader.execute(getActivity());
 
         getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
             @Override
