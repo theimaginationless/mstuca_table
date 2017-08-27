@@ -731,11 +731,13 @@ public class SheduleListFragment extends Fragment {
             mAuditoryTextView.setText(discipline.getAuditoryNumber());
             mLectureTypeTextView.setText(discipline.getType());
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");
-            SimpleDateFormat dateTitleFormatter = new SimpleDateFormat("dd MMMM yyyy");
+            SimpleDateFormat dateTitleFormatter = new SimpleDateFormat("EEEE, dd MMMM yyyy");
             SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
+            String headerTitle = dateTitleFormatter.format(mDiscipline.getDate());
+            headerTitle = headerTitle.substring(0, 1).toUpperCase() + headerTitle.substring(1);
             mDate.setText(dateFormatter.format(discipline.getDate()));
             mDurationTime.setText(timeFormatter.format(mDiscipline.getDate()) + " - " + timeFormatter.format(new Date(mDiscipline.getEndTime())));
-            mGlobalDate.setText(dateTitleFormatter.format(mDiscipline.getDate()));
+            mGlobalDate.setText(headerTitle);
             mPairNumber.setText(Integer.toString(mDiscipline.getNumber()) + " " + getString(R.string.pair_counter_text));
 
         }
