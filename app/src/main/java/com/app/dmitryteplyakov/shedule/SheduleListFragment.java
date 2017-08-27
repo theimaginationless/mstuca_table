@@ -3,6 +3,7 @@ package com.app.dmitryteplyakov.shedule;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -10,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -533,6 +535,11 @@ public class SheduleListFragment extends Fragment {
         private Context localContext;
 
         @Override
+        protected void onPreExecute() {
+            mSwipeRefreshData.setRefreshing(true);
+        }
+
+        @Override
         protected Void doInBackground(Context ... contexts) {
             for(Context context : contexts)
                 localContext = context;
@@ -542,6 +549,7 @@ public class SheduleListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             updateUI(localContext);
+            mSwipeRefreshData.setRefreshing(false);
             super.onPostExecute(result);
         }
     }
@@ -554,7 +562,7 @@ public class SheduleListFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mSwipeRefreshData.setRefreshing(true);
+                  mSwipeRefreshData.setRefreshing(true);
                 }
             });
             super.onPreExecute();
@@ -581,14 +589,14 @@ public class SheduleListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             Log.d("AsyncLoader", "Thread closed.");
+
+            updateUI(localContext);
             ((AppCompatActivity)localContext).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mSwipeRefreshData.setRefreshing(false);
-
                 }
             });
-            updateUI(localContext);
             Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
         }
@@ -683,6 +691,7 @@ public class SheduleListFragment extends Fragment {
             mDiscipline = discipline;
             mTeacherNameTextView.setText(discipline.getTeacherName());
             mDiscipleNameTextView.setText(discipline.getDiscipleName());
+
             mAuditoryTextView.setText(discipline.getAuditoryNumber());
             mLectureTypeTextView.setText(discipline.getType());
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");
@@ -726,6 +735,8 @@ public class SheduleListFragment extends Fragment {
             mDiscipline = discipline;
             mTeacherNameTextView.setText(discipline.getTeacherName());
             mDiscipleNameTextView.setText(discipline.getDiscipleName());
+
+
             mAuditoryTextView.setText(discipline.getAuditoryNumber());
             mLectureTypeTextView.setText(discipline.getType());
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");
