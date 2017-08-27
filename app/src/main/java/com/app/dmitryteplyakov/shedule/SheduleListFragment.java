@@ -2,6 +2,7 @@ package com.app.dmitryteplyakov.shedule;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -11,6 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
@@ -84,7 +86,7 @@ public class SheduleListFragment extends Fragment {
             File localFile = new File(mContext.getFilesDir() + "/" + filename);
             Log.d("DW", Boolean.toString(localFile.exists()));
             if(!forcedUpdate) {
-                Log.d("SLFDownloader", "Forced updating...");
+                Log.d("SLFDownloader", "Forced updating disabled");
                 if (localFile.exists()) {
                     localeShedule = mContext.openFileInput(filename);
                     Date lastModLocal = new Date(localFile.lastModified());
@@ -506,8 +508,13 @@ public class SheduleListFragment extends Fragment {
         protected Void doInBackground(Context ... contexts) {
             for(Context context : contexts)
                 localContext = context;
-            updateUI(localContext);
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            updateUI(localContext);
+            super.onPostExecute(result);
         }
     }
 
@@ -584,8 +591,11 @@ public class SheduleListFragment extends Fragment {
 
             }
         });
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-        if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
+        //if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
+        if(!notFirstRun && sharedPreferences.getBoolean("check_update_when_start", true)) {
+            Log.d("SLF", "First check updates start");
             AsyncLoader loader = new AsyncLoader();
             loader.execute(getActivity());
         } else {

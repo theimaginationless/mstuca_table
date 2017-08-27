@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">shedule</string>
+    <string name="app_name">MSTUCA</string>
     <string name="settings">Настройки</string>
     <string name="waiting_text">Подождите...</string>
     <string name="error_connection">Проверьте соединение с интернетом</string>
@@ -22,4 +22,5 @@
         <item>"4"</item>
     </array>
     <string name="update_toolbar">Обновить</string>
+    <string name="check_update_when_start">Проверять обновление расписания при запуске</string>
 </resources>

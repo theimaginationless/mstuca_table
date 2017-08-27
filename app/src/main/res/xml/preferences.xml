@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <ListPreference
+    <!--<ListPreference
         android:title="@string/subgroup_eng"
         android:key="subgroup_eng"
         android:entries="@array/subgroup"
@@ -14,5 +14,9 @@
         android:title="@string/course"
         android:key="course"
         android:entries="@array/courses"
-        android:entryValues="@array/courses"/>
+        android:entryValues="@array/courses"/> -->
+    <SwitchPreference
+        android:defaultValue="true"
+        android:title="@string/check_update_when_start"
+        android:key="check_update_when_start"/>
 </PreferenceScreen>
