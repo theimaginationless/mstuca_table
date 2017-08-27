@@ -589,14 +589,14 @@ public class SheduleListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             Log.d("AsyncLoader", "Thread closed.");
-
-            updateUI(localContext);
             ((AppCompatActivity)localContext).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mSwipeRefreshData.setRefreshing(false);
                 }
             });
+            updateUI(localContext);
+
             Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
         }
