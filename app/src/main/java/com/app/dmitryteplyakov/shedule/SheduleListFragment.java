@@ -333,13 +333,13 @@ public class SheduleListFragment extends Fragment {
                     //if(exclusePart.contains(";")) {
                         int firstI = 0;
                         List<String> arrayParts = new ArrayList<>();
-                        for (int i = 0; i < firstPart.length(); i++) {
-                            if(firstPart.charAt(i) == ';') {
-                                arrayParts.add(firstPart.substring(firstI, i));
+                        for (int i = 0; i < exclusePart.length(); i++) {
+                            if(exclusePart.charAt(i) == ';') {
+                                arrayParts.add(exclusePart.substring(firstI, i));
                                 firstI = i + 1;
                             }
-                            if(i == firstPart.length() - 1)
-                                arrayParts.add(firstPart.substring(firstI, i + 1));
+                            if(i == exclusePart.length() - 1)
+                                arrayParts.add(exclusePart.substring(firstI, i + 1));
                         }
                         for (String str : arrayParts) {
                             Log.d("SLF", "STR FOR EXCL CALENDARS: " + str);
@@ -407,11 +407,12 @@ public class SheduleListFragment extends Fragment {
                 int startMonth = startCalendar.get(Calendar.MONTH);
                 int endMonth = endCalendar.get(Calendar.MONTH);
                 if(onceCalendars.size() != 0) {
-
-                    startCalendar = onceCalendars.get(i);
-                    endCalendar = onceCalendars.get(i);
-                    startMonth = onceCalendars.get(i).get(Calendar.MONTH);
-                    endMonth = onceCalendars.get(i).get(Calendar.MONTH);
+                    if(!isExclude) {
+                        startCalendar = onceCalendars.get(i);
+                        endCalendar = onceCalendars.get(i);
+                        startMonth = onceCalendars.get(i).get(Calendar.MONTH);
+                        endMonth = onceCalendars.get(i).get(Calendar.MONTH);
+                    }
                     Log.d("SLF EXPERIMENTAL", "STARTMONTH: " + Integer.toString(startMonth + 1) + " ENDMONTH: " + Integer.toString(endMonth + 1));
                 }
                 for (int MONTH = startCalendar.get(Calendar.MONTH); MONTH <= endCalendar.get(Calendar.MONTH); MONTH++) {
