@@ -8,8 +8,8 @@
     <string name="data_updated">Данные обновлены</string>
     <string name="subgroup_eng">Подгруппа по ин. Яз</string>
     <string name="subgroup_lab">Подгруппа по лабораторным работам</string>
-    <string name="first">Первая</string>
-    <string name="second">Вторая</string>
+    <string name="first">"1"</string>
+    <string name="second">"2"</string>
     <string-array name="subgroup">
         <item>@string/first</item>
         <item>@string/second</item>

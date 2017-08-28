@@ -76,6 +76,13 @@ public class SheduleListFragment extends Fragment {
     private boolean notFirstRun;
     private LinearLayoutManager gridLayoutManager;
     private boolean onceDiscipline;
+    private boolean isSubgroup;
+    private boolean isDbDrop;
+
+    public void dbDropped() {
+        isDbDrop = true;
+    }
+
 
 
     private boolean downloadFile(Context mContext) {
@@ -92,6 +99,9 @@ public class SheduleListFragment extends Fragment {
             Date lastModRemote = new Date(connection.getLastModified());
             File localFile = new File(mContext.getFilesDir() + "/" + filename);
             Log.d("DW", Boolean.toString(localFile.exists()));
+            if(isDbDrop)
+                return true;
+
             if(!forcedUpdate) {
                 Log.d("SLFDownloader", "Forced updating disabled");
                 if (localFile.exists()) {
@@ -103,12 +113,11 @@ public class SheduleListFragment extends Fragment {
                         if (swipeRefresh)
                             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
                         Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
-                        return false;
+                            return false;
                     }
                 }
             }
             forcedUpdate = false;
-
 
             output = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
 
@@ -137,7 +146,18 @@ public class SheduleListFragment extends Fragment {
 
     }
 
-    private void sheduleReader(boolean isNew, int sheet) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0 && notFirstRun) {
+            Log.d("SLF", "Rebase after DB RESET");
+            isDbDrop = true;
+            AsyncLoader loader = new AsyncLoader(0);
+            loader.execute(getActivity());
+        }
+    }
+
+    private void sheduleReader(boolean isNew, int sheet, int labGroup, int langGroup) {
         if (!isNew) {
             Log.d("SHDRDR", "Data is fresh. Skip updating...");
             return;
@@ -160,6 +180,7 @@ public class SheduleListFragment extends Fragment {
         HSSFSheet mySheduleSheet = myShedule.getSheetAt(sheet);
 
         List<CellRangeAddress> regions = mySheduleSheet.getMergedRegions();
+
         for (int rowIndex = 1; rowIndex + 3 <= mySheduleSheet.getLastRowNum(); rowIndex++) {
                 if (mySheduleSheet.getRow(rowIndex + 2).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex + 1).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex).getCell(2).getStringCellValue().equals("")) {
                     Log.d("SLF", "EMPTY!");
@@ -180,14 +201,22 @@ public class SheduleListFragment extends Fragment {
             String exclusePart = "";
             String week = "";
             String date = "";
-            /*for(int i = rowIndex; i < rowIndex + 3; i++) {
-                if (mySheduleSheet.getRow(rowIndex).getCell(1).getStringCellValue().equals(""))
+            if(sheet != 0) {
+                if (sheet != langGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
+                    Log.d("SLF", "Пропускаем ин. Яз " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по ин. Яз: " + Integer.toString(sheet));
+                    rowIndex += 2;
+                    onceDiscipline = false;
+                    Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex+1));
                     continue;
-                week = mySheduleSheet.getRow(rowIndex).getCell(1).getStringCellValue();
-                Log.d("SLF", Integer.toString(rowIndex) + " TITLE: " + disciplineTitle + " WEEK: " + week);
-                break;
-            }*/
-            //for(int i = rowIndex; i < )
+                }
+                if (sheet != labGroup && disciplineType.contains("Лаб.раб.")) {
+                    Log.d("SLF", "Пропускаем лабу " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по лабам: " + Integer.toString(sheet));
+                    rowIndex += 2;
+                    onceDiscipline = false;
+                    Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex+1));
+                    continue;
+                }
+            }
 
             // Weeks
             for (CellRangeAddress region : regions) {
@@ -535,9 +564,16 @@ public class SheduleListFragment extends Fragment {
                                 tempDiscipline.setAuditoryNumber(aud);
                                 tempDiscipline.setDiscipleName(disciplineTitle);
                                 tempDiscipline.setTeacherName(teacherName);
-                                Log.d("RESULT_ADD", "TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
-
+                                if(sheet != 0) {
+                                    Log.d("SLF", "SUBGROUP: " + tempDiscipline.getDiscipleName() + " DATE: " + tempDiscipline.getDate().toString());
+                                    if(DisciplineStorage.get(getActivity()).getDiscipleByDate(tempDiscipline.getDate()) != null) {
+                                        DisciplineStorage.get(getActivity()).deleteDisciplineByDate(tempDiscipline.getDate());
+                                        Log.d("SLF", "DELETE OLD");
+                                    }
+                                }
                                 DisciplineStorage.get(getActivity()).addDisciple(tempDiscipline);
+                                Log.d("RESULT_ADD", "SHEET: " + Integer.toString(sheet) + " TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
+
                             } else
                                 continue;
                         } else
@@ -555,6 +591,10 @@ public class SheduleListFragment extends Fragment {
             Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 3) + " NEW: " + Integer.toString(rowIndex));
             //break;
         }
+    }
+
+    private void sheduleMerger() {
+        
     }
 
 
@@ -577,7 +617,7 @@ public class SheduleListFragment extends Fragment {
 
     private void workingOn(final Context mContext, final int sheet) {
         dSuccess = false;
-
+        Log.d("workingOn", Integer.toString(sheet));
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -588,7 +628,20 @@ public class SheduleListFragment extends Fragment {
         Thread readThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                sheduleReader(dSuccess, sheet);
+                sheduleReader(dSuccess, 0, 0, 0);
+                //isSubgroup = true;
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                int langGroup;
+                int labGroup;
+                if(Integer.parseInt(sharedPreferences.getString("subgroup_lang", getString(R.string.first))) == 1)
+                    langGroup = 2;
+                else
+                    langGroup = 3;
+                if(Integer.parseInt(sharedPreferences.getString("subgroup_lab", getString(R.string.first))) == 1)
+                    labGroup = 2;
+                else
+                    labGroup = 3;
+                sheduleReader(dSuccess, sheet, labGroup, langGroup);
             }
         });
 
@@ -615,6 +668,7 @@ public class SheduleListFragment extends Fragment {
 
     private void checkStarter(Context mContext, int sheet) {
         Thread thread = null;
+
         if(isOnline()) {
             workingOn(mContext, sheet);
         } else {
@@ -648,6 +702,11 @@ public class SheduleListFragment extends Fragment {
 
     private class AsyncLoader extends AsyncTask<Context, Void, Void> {
         private Context localContext;
+        private int sheet;
+
+        public AsyncLoader(int sheet) {
+            this.sheet = sheet;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -668,7 +727,9 @@ public class SheduleListFragment extends Fragment {
             //    forcedUpdate = true;
             //    Log.d("Thread CHECKSTARTER", "SHEET INDEX: " + Integer.toString(i));
             //    checkStarter(localContext, i);
-            checkStarter(localContext, 0);
+            //checkStarter(localContext, 0);
+            checkStarter(localContext, 2);
+            checkStarter(localContext, 3);
             //}
             return null;
         }
@@ -676,9 +737,10 @@ public class SheduleListFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             Log.d("AsyncLoader", "Thread closed.");
-
             updateUI(localContext);
             mSwipeRefreshData.setRefreshing(false);
+            if(isDbDrop)
+                isDbDrop = false;
 
             Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
@@ -704,7 +766,7 @@ public class SheduleListFragment extends Fragment {
             @Override
             public void onRefresh() {
                 swipeRefresh = true;
-                AsyncLoader loader = new AsyncLoader();
+                AsyncLoader loader = new AsyncLoader(1);
                 loader.execute(getActivity());
 
             }
@@ -714,7 +776,11 @@ public class SheduleListFragment extends Fragment {
         //if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
         if(!notFirstRun && sharedPreferences.getBoolean("check_update_when_start", true)) {
             Log.d("SLF", "First check updates start");
-            AsyncLoader loader = new AsyncLoader();
+            AsyncLoader loader = new AsyncLoader(0);
+            loader.execute(getActivity());
+        } else if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
+            isDbDrop = true;
+            AsyncLoader loader = new AsyncLoader(0);
             loader.execute(getActivity());
         } else {
             AsyncUpdater updater = new AsyncUpdater();
@@ -919,7 +985,7 @@ public class SheduleListFragment extends Fragment {
         }
     }
 
-    private void updateUI(Context mContext) { // Обновление интерфейса. Связывание данных с адаптером
+    private synchronized void updateUI(Context mContext) { // Обновление интерфейса. Связывание данных с адаптером
         //List<Discipline> disciplines = DisciplineStorage.get(getActivity()).getDisciplines();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -963,7 +1029,7 @@ public class SheduleListFragment extends Fragment {
             case R.id.refresh_toolbar:
                 swipeRefresh = true;
                 //checkStarter(getActivity());
-                AsyncLoader loader = new AsyncLoader();
+                AsyncLoader loader = new AsyncLoader(0);
                 loader.execute(getActivity());
                 return true;
             case R.id.settings:

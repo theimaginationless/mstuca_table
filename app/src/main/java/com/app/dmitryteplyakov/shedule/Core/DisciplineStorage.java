@@ -110,6 +110,19 @@ public class DisciplineStorage {
         }
     }
 
+    public Discipline getDisciplineByDate(Date date) {
+        DisciplineCursorWrapper cursor = queryDiscipline(DisciplineTable.Cols.DATE + " = ?",
+                new String[]{date.toString()}
+        );
+        try {
+            cursor.moveToFirst();
+            if(cursor.getCount() == 0) return null;
+            return cursor.getDiscipline();
+        } finally {
+            cursor.close();
+        }
+    }
+
     public List<Discipline> getDisciplinesByDate(Date date) {
         List<Discipline> disciplines = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -165,7 +178,7 @@ public class DisciplineStorage {
     }
 
     public Discipline getDiscipleByNumber(int num) {
-        DisciplineCursorWrapper cursor = queryDiscipline("_id" + " = ?",
+        DisciplineCursorWrapper cursor = queryDiscipline("CAST (_id" + " AS TEXT) = ?",
                 new String[]{Integer.toString(num)}
         );
         try {
@@ -178,11 +191,12 @@ public class DisciplineStorage {
     }
 
     public Discipline getDiscipleByDate(Date date) {
-        DisciplineCursorWrapper cursor = queryDiscipline(DisciplineTable.Cols.DATE + " = ?",
+        DisciplineCursorWrapper cursor = queryDiscipline("CAST (" + DisciplineTable.Cols.DATE + " AS TEXT) = ?",
                 new String[]{Long.toString(date.getTime()).toString()}
         );
         try {
             cursor.moveToFirst();
+            Log.d("DB", Integer.toString(cursor.getCount()));
             if(cursor.getCount() == 0) return null;
             return cursor.getDiscipline();
         } finally {
@@ -202,9 +216,22 @@ public class DisciplineStorage {
         );
     }
 
+    public void updateDisciplineByDate(Discipline discipline) {
+        ContentValues values = getContentValues(discipline);
+        mDatabase.update(DisciplineTable.NAME, values, "CAST (" + DisciplineTable.Cols.DATE + " AS TEXT) = ?",
+                new String[]{Long.toString(discipline.getDate().getTime())}
+        );
+    }
+
     public void deleteDiscipline(Discipline discipline) {
         mDatabase.delete(DisciplineTable.NAME, DisciplineTable.Cols.UUID + " = ?",
                 new String[]{discipline.getId().toString()}
+        );
+    }
+
+    public void deleteDisciplineByDate(Date date) {
+        mDatabase.delete(DisciplineTable.NAME, "CAST (" + DisciplineTable.Cols.DATE + " AS TEXT) = ?",
+                new String[]{Long.toString(date.getTime())}
         );
     }
 
