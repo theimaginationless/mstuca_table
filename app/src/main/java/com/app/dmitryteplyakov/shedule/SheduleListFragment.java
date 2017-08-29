@@ -49,9 +49,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -102,7 +105,6 @@ public class SheduleListFragment extends Fragment {
 
 
     private boolean downloadFile(Context mContext) {
-        //private static String file_url = "http://mstuca.ru/students/schedule/webdav_bizproc_history_get/35345/35345/?force_download=1";
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         /*String faculty = sharedPreferences.getString("faculty", "0");
         String spec = sharedPreferences.getString("spec", "0");
@@ -112,14 +114,16 @@ public class SheduleListFragment extends Fragment {
         String spec = getString(R.string.app_math_val);
         String course = sharedPreferences.getString("course", "0");
         String stream = getString(R.string.first);
-
-        String file_url;
+        String file_url = null;
+        //file_url = "http://mstuca.ru/students/schedule/Факультет прикладной математики и вычислительной техники (ФПМиВТ)/ПМ/ПМб 2-1.xls".replaceAll(" ", "%20");
+        //file_url = "http://mstuca.ru/students/schedule/webdav_bizproc_history_get/35345/35345/?force_download=1";
         if (course.equals("0")) {
             turnOff = true;
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.select_course_snackbar), Snackbar.LENGTH_LONG).show();
             return false;
         }
-        file_url = "http://mstuca.ru/students/schedule/" + faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
+        file_url = ("http://mstuca.ru/students/schedule/" + faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls").replaceAll(" ", "%20");
+        Log.d("SLFDownloader", "Check " + file_url);
         /*if(course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
             Log.d("SLFDownloader", "Data isn't fully!");
             return false;
@@ -141,7 +145,7 @@ public class SheduleListFragment extends Fragment {
             SimpleDateFormat dateformatter = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             Date lastModRemote = new Date(connection.getLastModified());
             File localFile = new File(mContext.getFilesDir() + "/" + filename);
-            Log.d("DW", Boolean.toString(localFile.exists()));
+            Log.d("Already?", Boolean.toString(localFile.exists()));
             if (isDbDrop && localFile.exists() &&!isCourseChanged)
                 return true;
 
@@ -156,12 +160,14 @@ public class SheduleListFragment extends Fragment {
                         if (swipeRefresh)
                             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
                         Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
+                        turnOff = true;
                         return false;
                     }
                 }
             }
             setIsCourseChanged(false);
             forcedUpdate = false;
+            Log.d("DOWN", "HERE");
 
             output = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
 
@@ -718,6 +724,7 @@ public class SheduleListFragment extends Fragment {
             workingOn(mContext, sheet);
         } else {
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
+            turnOff = true;
         }
         Log.d("SLF", "Connection state: " + Boolean.toString(isOnline()));
     }
