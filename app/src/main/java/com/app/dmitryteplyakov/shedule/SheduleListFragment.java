@@ -123,7 +123,7 @@ public class SheduleListFragment extends Fragment {
             return false;
         }
         file_url = ("http://mstuca.ru/students/schedule/" + faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls").replaceAll(" ", "%20");
-        Log.d("SLFDownloader", "Check " + file_url);
+        //Log.d("SLFDownloader", "Check " + file_url);
         /*if(course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
             Log.d("SLFDownloader", "Data isn't fully!");
             return false;
