@@ -894,7 +894,7 @@ public class SheduleListFragment extends Fragment {
             SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
             mDate.setText(dateFormatter.format(discipline.getDate()));
             mDurationTime.setText(timeFormatter.format(mDiscipline.getDate()) + " - " + timeFormatter.format(new Date(mDiscipline.getEndTime())));
-            mPairNumber.setText(Integer.toString(mDiscipline.getNumber()) + " " + getString(R.string.pair_counter_text));
+            mPairNumber.setText(Integer.toString(mDiscipline.getNumber()));
         }
 
         @Override
@@ -943,7 +943,7 @@ public class SheduleListFragment extends Fragment {
             mDate.setText(dateFormatter.format(discipline.getDate()));
             mDurationTime.setText(timeFormatter.format(mDiscipline.getDate()) + " - " + timeFormatter.format(new Date(mDiscipline.getEndTime())));
             mGlobalDate.setText(headerTitle);
-            mPairNumber.setText(Integer.toString(mDiscipline.getNumber()) + " " + getString(R.string.pair_counter_text));
+            mPairNumber.setText(Integer.toString(mDiscipline.getNumber()));
 
         }
 
