@@ -87,6 +87,7 @@ public class SheduleListFragment extends Fragment {
     private boolean isSubgroup;
     private boolean isDbDrop;
     private boolean turnOff;
+    private boolean inProcess;
     private static boolean isCourseChanged;
     private static final int REQUEST_DATE = 5;
     private static final String DIALOG_DATE = "com.app.shedulelistfragment.dialog_date";
@@ -756,6 +757,7 @@ public class SheduleListFragment extends Fragment {
         protected void onPreExecute() {
             mSwipeRefreshData.setRefreshing(true);
             turnOff = false;
+            inProcess = true;
             super.onPreExecute();
 
         }
@@ -788,7 +790,7 @@ public class SheduleListFragment extends Fragment {
             mSwipeRefreshData.setRefreshing(false);
             if (isDbDrop)
                 isDbDrop = false;
-
+            inProcess = false;
             Log.d("AsyncLoader AFTER", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
         }
@@ -852,12 +854,6 @@ public class SheduleListFragment extends Fragment {
         });
 
         return v;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putSerializable(EXTRA_SAVED, notFirstRun);
     }
 
     // Реализация адаптера
@@ -1084,14 +1080,15 @@ public class SheduleListFragment extends Fragment {
                 startActivity(intent);
                 return true;
             case R.id.calendar_picker:
-                FragmentManager manager = getFragmentManager();
-                UUID id = DisciplineStorage.get(getActivity()).getDiscipleByNumber(1).getId();
-                if(DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()) != null)
-                    id = DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()).getId();
-                CalendarDialog dialog = CalendarDialog.newInstance(id);
-                dialog.setTargetFragment(SheduleListFragment.this, REQUEST_DATE);
-                dialog.show(manager, DIALOG_DATE);
-
+                if((DisciplineStorage.get(getActivity()).getDisciplines().size() != 0) && !inProcess) {
+                    FragmentManager manager = getFragmentManager();
+                    UUID id = DisciplineStorage.get(getActivity()).getDiscipleByNumber(1).getId();
+                    if (DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()) != null)
+                        id = DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()).getId();
+                    CalendarDialog dialog = CalendarDialog.newInstance(id);
+                    dialog.setTargetFragment(SheduleListFragment.this, REQUEST_DATE);
+                    dialog.show(manager, DIALOG_DATE);
+                }
                 return true;
         }
 
