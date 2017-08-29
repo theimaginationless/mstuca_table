@@ -3,6 +3,7 @@ package com.app.dmitryteplyakov.shedule;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -30,6 +31,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -1088,6 +1091,7 @@ public class SheduleListFragment extends Fragment {
                 CalendarDialog dialog = CalendarDialog.newInstance(id);
                 dialog.setTargetFragment(SheduleListFragment.this, REQUEST_DATE);
                 dialog.show(manager, DIALOG_DATE);
+
                 return true;
         }
 

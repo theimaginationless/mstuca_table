@@ -2,6 +2,7 @@ package com.app.dmitryteplyakov.shedule;
 
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +13,8 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.DatePicker;
 
 import com.app.dmitryteplyakov.shedule.Core.Discipline;
@@ -51,13 +54,14 @@ public class CalendarDialog extends DialogFragment {
         Calendar currentCal = Calendar.getInstance();
         Collections.sort(disciplineList, Discipline.dateComparator);
         Log.d("TES", disciplineList.get(DisciplineStorage.get(getActivity()).getDisciplines().size() - 1).getDate().toString());
-        mDatePicker.setMaxDate(disciplineList.get(DisciplineStorage.get(getActivity()).getDisciplines().size() - 1).getDate().getTime());
-        Calendar minDate = Calendar.getInstance();
-        minDate.setTime(disciplineList.get(1).getDate());
-        mDatePicker.setMinDate(minDate.getTimeInMillis());
+        //mDatePicker.setMaxDate(disciplineList.get(DisciplineStorage.get(getActivity()).getDisciplines().size() - 1).getDate().getTime());
+        //Calendar minDate = Calendar.getInstance();
+        //minDate.setTime(disciplineList.get(1).getDate());
+        //mDatePicker.setMinDate(minDate.getTimeInMillis());
+
 
         //mDatePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), null);
-        return new AlertDialog.Builder(getActivity())
+        /*return new AlertDialog.Builder(getActivity())
                 .setView(v)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -73,7 +77,40 @@ public class CalendarDialog extends DialogFragment {
                         Log.d("CALENDAR", calendar.getTime().toString());
                         sendResult(Activity.RESULT_OK, calendar.getTime());
                     }
-                }).create();
+                }).create();*/
+
+        AlertDialog.Builder d = new AlertDialog.Builder(getActivity());
+        /*AlertDialog dialog = d.setView(v)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Calendar calendar = Calendar.getInstance();
+                        Calendar currentDate = Calendar.getInstance();
+                        int year = currentDate.get(Calendar.YEAR);
+                        int month = currentDate.get(Calendar.MONTH);
+                        int day = currentDate.get(Calendar.DAY_OF_MONTH);
+                        month = mDatePicker.getMonth();
+                        day = mDatePicker.getDayOfMonth();
+                        calendar.set(mDatePicker.getYear(), month, day, 0, 0);
+                        Log.d("CALENDAR", calendar.getTime().toString());
+                        sendResult(Activity.RESULT_OK, calendar.getTime());
+                    }
+                }).create();*/
+        DatePickerDialog.OnDateSetListener listener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(year, month, day, 0, 0);
+                Log.d("CALENDAR", calendar.getTime().toString());
+                sendResult(Activity.RESULT_OK, calendar.getTime());
+            }
+        };
+        DatePickerDialog tpd = new DatePickerDialog(getActivity(), listener, currentCal.get(Calendar.YEAR), currentCal.get(Calendar.MONTH), currentCal.get(Calendar.DAY_OF_MONTH));
+        tpd.getDatePicker().setMaxDate(disciplineList.get(DisciplineStorage.get(getActivity()).getDisciplines().size() - 1).getDate().getTime());
+        Calendar minDate = Calendar.getInstance();
+        minDate.setTime(disciplineList.get(1).getDate());
+        tpd.getDatePicker().setMinDate(minDate.getTimeInMillis());
+        return tpd;
     }
 
     private void sendResult(int resultCode, Date time) {
