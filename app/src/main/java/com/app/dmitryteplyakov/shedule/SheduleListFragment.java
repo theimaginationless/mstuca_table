@@ -213,6 +213,10 @@ public class SheduleListFragment extends Fragment {
         } catch (IOException e) {
             Log.e("sheduleReader", "Error read shedule file!");
         }
+        if(myShedule.getNumberOfSheets() < sheet + 1) {
+            Log.d("sheduleReader", "Done.");
+            return;
+        }
         HSSFSheet mySheduleSheet = myShedule.getSheetAt(sheet);
 
         List<CellRangeAddress> regions = mySheduleSheet.getMergedRegions();
