@@ -238,5 +238,7 @@ public class DisciplineStorage {
     public void resetDb() {
         Log.d("DB", "RESET DB!");
         mDatabase.delete(DisciplineTable.NAME, null, null);
+        mDatabase.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" + DisciplineTable.NAME + "'");
+
     }
 }

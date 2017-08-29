@@ -203,14 +203,14 @@ public class SheduleListFragment extends Fragment {
             String date = "";
             if(sheet != 0) {
                 if (sheet != langGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
-                    Log.d("SLF", "Пропускаем ин. Яз " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по ин. Яз: " + Integer.toString(sheet));
+                    Log.d("SLF", "Пропускаем ин. Яз " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по ин. Яз: " + Integer.toString(sheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
                     Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex+1));
                     continue;
                 }
                 if (sheet != labGroup && disciplineType.contains("Лаб.раб.")) {
-                    Log.d("SLF", "Пропускаем лабу " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по лабам: " + Integer.toString(sheet));
+                    Log.d("SLF", "Пропускаем лабу " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по лабам: " + Integer.toString(sheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
                     Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex+1));
@@ -593,10 +593,6 @@ public class SheduleListFragment extends Fragment {
         }
     }
 
-    private void sheduleMerger() {
-        
-    }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -628,7 +624,7 @@ public class SheduleListFragment extends Fragment {
         Thread readThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                sheduleReader(dSuccess, 0, 0, 0);
+                //sheduleReader(dSuccess, 0, 0, 0);
                 //isSubgroup = true;
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 int langGroup;
@@ -720,14 +716,14 @@ public class SheduleListFragment extends Fragment {
             for(Context context : contexts)
                 localContext = context;
             //DisciplineStorage.get(localContext).resetDb();
-            Log.d("Thread", "Size: " + Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
+            Log.d("AsyncLoader PRE", "Size: " + Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             //for(int i = 0; i < 4; i++) {
             //    if(i == 1)
             //        continue;
             //    forcedUpdate = true;
             //    Log.d("Thread CHECKSTARTER", "SHEET INDEX: " + Integer.toString(i));
             //    checkStarter(localContext, i);
-            //checkStarter(localContext, 0);
+            checkStarter(localContext, 0);
             checkStarter(localContext, 2);
             checkStarter(localContext, 3);
             //}
@@ -742,7 +738,7 @@ public class SheduleListFragment extends Fragment {
             if(isDbDrop)
                 isDbDrop = false;
 
-            Log.d("AsyncLoader", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
+            Log.d("AsyncLoader AFTER", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
         }
     }
