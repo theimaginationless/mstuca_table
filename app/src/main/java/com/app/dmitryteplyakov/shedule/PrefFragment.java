@@ -31,11 +31,82 @@ public class PrefFragment extends PreferenceFragmentCompat {
             String sett = (String) getArguments().getSerializable(ARG_PREF);
             if(sett.equals("general")) {
                 addPreferencesFromResource(R.xml.preferences);
-                ListPreference prefListlang = (ListPreference) findPreference("subgroup_lang");
-                ListPreference prefListLab = (ListPreference) findPreference("subgroup_lab");
+                final ListPreference prefListlang = (ListPreference) findPreference("subgroup_lang");
+                final ListPreference prefListLab = (ListPreference) findPreference("subgroup_lab");
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 final String firstListLangValue = sharedPreferences.getString("subgroup_lang", getString(R.string.first));
                 final String firstListLabValue = sharedPreferences.getString("subgroup_lab", getString(R.string.first));
+                final ListPreference prefListCourse = (ListPreference) findPreference("course");
+
+                prefListCourse.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        DisciplineStorage.get(getActivity()).resetDb();
+                        Log.d("Pref", "Subgroup is changed. Drop DB!");
+                        SheduleListFragment.setIsCourseChanged(true);
+                        return true;
+                    }
+                });
+                /*ListPreference prefListFaculty = (ListPreference) findPreference("faculty");
+                final ListPreference prefListSpec = (ListPreference) findPreference("spec");
+                final ListPreference prefListStream = (ListPreference) findPreference("stream");
+                final ListPreference prefListCourse = (ListPreference) findPreference("course");
+
+                if(!sharedPreferences.getString("spec", "0").equals("0")) {
+                    prefListlang.setEnabled(true);
+                    prefListLab.setEnabled(true);
+                    prefListCourse.setEnabled(true);
+                }
+
+                prefListStream.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        prefListlang.setEnabled(true);
+                        prefListLab.setEnabled(true);
+                        return true;
+                    }
+                });
+
+                prefListSpec.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        prefListStream.setEnabled(true);
+                        Log.d("Pref", "Subgroup is changed. Drop DB!");
+                        DisciplineStorage.get(getActivity()).resetDb();
+                        prefListCourse.setEnabled(true);
+                        return true;
+
+                    }
+
+                });
+
+                prefListFaculty.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        prefListSpec.setEnabled(true);
+                        if(((String) newValue).equals(getString(R.string.appmath_and_cs))) {
+                            prefListSpec.setEntries(R.array.app_math_and_cs_list);
+                            prefListSpec.setEntryValues(R.array.app_math_and_cs_list_values);
+                        }
+                        Log.d("Pref", "Subgroup is changed. Drop DB!");
+                        DisciplineStorage.get(getActivity()).resetDb();
+                        else if(((String) newValue).equals(getString(R.string.mech))) {
+                            prefListSpec.setEntries(R.array.mech_list);
+                            prefListSpec.setEntryValues(R.array.mech_list);
+                        }
+                        else if(((String) newValue).equals(getString(R.string.fask))) {
+                            prefListSpec.setEntries(R.array.fask_list);
+                            prefListSpec.setEntryValues(R.array.fask_list);
+                        }
+                        else if(((String) newValue).equals(getString(R.string.fuvt))) {
+                            prefListSpec.setEntries(R.array.fuvt_list);
+                            prefListSpec.setEntryValues(R.array.fuvt_list);
+                        }
+
+                        return true;
+                    }
+                });
+        */
 
                 prefListlang.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override

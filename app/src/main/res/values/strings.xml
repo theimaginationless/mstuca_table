@@ -10,17 +10,84 @@
     <string name="subgroup_lab">Подгруппа по лабораторным работам</string>
     <string name="first">"1"</string>
     <string name="second">"2"</string>
+    <string name="three">"3"</string>
+    <string name="four">"4"</string>
     <string-array name="subgroup">
         <item>@string/first</item>
         <item>@string/second</item>
     </string-array>
     <string name="course">Курс</string>
     <array name="courses">
-        <item>"1"</item>
-        <item>"2"</item>
-        <item>"3"</item>
-        <item>"4"</item>
+        <item>@string/first</item>
+        <item>@string/second</item>
+        <item>@string/three</item>
+        <item>@string/four</item>
     </array>
+    <string name="stream">Поток</string>
+    <array name="streams">
+        <item>@string/first</item>
+        <item>@string/second</item>
+        <item>@string/three</item>
+        <item>@string/four</item>
+    </array>
+    <string name="faculty">Факультет</string>
+    <array name="faculties">
+        <item>@string/appmath_and_cs</item>
+        <!--<item>@string/mech</item>
+        <item>@string/fask</item>
+        <item>@string/fuvt</item>-->
+    </array>
+    <string name="appmath_and_cs">"Факультет прикладной математики и вычислительной техники (ФПМиВТ)"</string>
+    <!--<string name="mech">"Механический факультет"</string>
+    <string name="fask">"Факультет авиационных систем и комплексов (ФАСК)"</string>
+    <string name="fuvt">"Факультет управления на воздушном транспорте (ФУВТ)"</string>-->
+    <string name="spec">Направление подготовки</string>
+    <array name="app_math_and_cs_list">
+        <item>@string/app_math</item>
+        <item>@string/bi</item>
+        <item>@string/evm</item>
+    </array>
+    <array name="app_math_and_cs_list_values">
+        <item>@string/app_math_val</item>
+        <item>@string/bi_val</item>
+        <item>@string/evm_val</item>
+    </array>
+
+    <array name="mech_list">
+        <item>@string/m</item>
+    </array>
+
+    <array name="fask_list">
+        <item>@string/ak</item>
+        <item>@string/rs</item>
+    </array>
+
+    <array name="fuvt_list">
+        <item>@string/op</item>
+        <item>@string/so</item>
+        <item>@string/uvd</item>
+        <item>@string/ek</item>
+
+    </array>
+
+    <string name="app_math_val">ПМб</string>
+    <string name="bi_val">БИТ</string>
+    <string name="evm_val">ЭВМб</string>
+
+
+    <string name="app_math">ПМ</string>
+    <string name="bi">БИ</string>
+    <string name="evm">ЭВМ</string>
+    <string name="m">М</string>
+    <string name="ak">АК</string>
+    <string name="rs">РС</string>
+
+    <string name="op">ОП</string>
+    <string name="so">СО</string>
+    <string name="uvd">УВД</string>
+    <string name="ek">ЭК</string>
+    <string name="select_course_snackbar">Выберите курс</string>
+
     <string name="update_toolbar">Обновить</string>
     <string name="check_update_when_start">Проверять обновление расписания при запуске</string>
     <string name="about">Developed by Dmitry Teplyakov</string>
