@@ -5,6 +5,11 @@
         android:title="@string/update_toolbar"
         android:id="@+id/refresh_toolbar"
         android:icon="@drawable/ic_refresh_black_24dp"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/calendar_picker"
+        android:title="@string/open_calendar_toolbar"
+        android:icon="@drawable/ic_calendar_white_24dp"
         app:showAsAction="always"/>
     <item
         android:title="@string/settings"

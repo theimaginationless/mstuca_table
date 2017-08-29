@@ -1,5 +1,7 @@
 package com.app.dmitryteplyakov.shedule;
 
+import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -55,6 +58,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * Created by Dmitry on 20.07.2017.
@@ -81,6 +85,8 @@ public class SheduleListFragment extends Fragment {
     private boolean isDbDrop;
     private boolean turnOff;
     private static boolean isCourseChanged;
+    private static final int REQUEST_DATE = 5;
+    private static final String DIALOG_DATE = "com.app.shedulelistfragment.dialog_date";
 
     public static void setIsCourseChanged(boolean state) {
         isCourseChanged = state;
@@ -1074,9 +1080,37 @@ public class SheduleListFragment extends Fragment {
                 Intent intent = PrefActivity.newIntent(getActivity(), "general");
                 startActivity(intent);
                 return true;
+            case R.id.calendar_picker:
+                FragmentManager manager = getFragmentManager();
+                UUID id = DisciplineStorage.get(getActivity()).getDiscipleByNumber(1).getId();
+                if(DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()) != null)
+                    id = DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()).getId();
+                CalendarDialog dialog = CalendarDialog.newInstance(id);
+                dialog.setTargetFragment(SheduleListFragment.this, REQUEST_DATE);
+                dialog.show(manager, DIALOG_DATE);
+                return true;
         }
 
         return onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
+        if(resultCode == Activity.RESULT_OK) {
+            if(requestCode == REQUEST_DATE) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate((Date) data.getSerializableExtra(CalendarDialog.RETURN_DATE), null);
+                        Log.d("RES", Integer.toString(pos));
+                        //smoothScroller.setTargetPosition(pos);
+                        //linearLayoutManager.startSmoothScroll(smoothScroller);
+                        linearLayoutManager.scrollToPositionWithOffset(pos, 0);
+
+                    }
+                });
+            }
+        }
     }
 
 }
