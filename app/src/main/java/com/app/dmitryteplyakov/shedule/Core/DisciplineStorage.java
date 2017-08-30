@@ -143,9 +143,7 @@ public class DisciplineStorage {
         DisciplineCursorWrapper cursor = queryDiscipline("CAST(" + DisciplineTable.Cols.DATE + " AS TEXT) BETWEEN " + "CAST(? AS TEXT) AND " + "CAST(? AS TEXT)",
                 new String[] {Long.toString(startBound), Long.toString(endBound)}
         );
-        /*DisciplineCursorWrapper cursor = queryDiscipline("CAST(" + DisciplineTable.Cols.DATE + " AS TEXT) = ?",
-                new String[]{Long.toString(startBound), Long.toString(endBound)}
-        );*/
+
         try {
             cursor.moveToFirst();
             while(!cursor.isAfterLast()) {
@@ -161,7 +159,8 @@ public class DisciplineStorage {
 
     private DisciplineStorage(Context context) {
         mContext = context.getApplicationContext();
-        mDatabase = new DisciplineBaseHelper(mContext).getWritableDatabase();
+        //mDatabase = new DisciplineBaseHelper(mContext).getWritableDatabase();
+        mDatabase = DisciplineBaseHelper.getInstance(mContext).getWritableDatabase();
     }
 
     public Discipline getDisciple(UUID id) {

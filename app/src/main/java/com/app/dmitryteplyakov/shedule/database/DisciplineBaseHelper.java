@@ -15,9 +15,17 @@ import static com.app.dmitryteplyakov.shedule.database.DisciplineDbSchema.*;
 public class DisciplineBaseHelper extends SQLiteOpenHelper {
     private static final int VERSION = 1;
     private static final String DATABASE_NAME = "disciplineBase.db";
+    private static DisciplineBaseHelper mInstance = null;
 
-    public DisciplineBaseHelper(Context context) {
+    private DisciplineBaseHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
+    }
+
+    public static DisciplineBaseHelper getInstance(Context context) {
+        if(mInstance == null) {
+            mInstance = new DisciplineBaseHelper(context.getApplicationContext());
+        }
+        return mInstance;
     }
 
     @Override

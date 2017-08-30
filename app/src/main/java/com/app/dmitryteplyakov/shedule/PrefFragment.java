@@ -9,7 +9,6 @@ import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
 import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
-
 /**
  * Created by dmitry21 on 26.08.17.
  */
@@ -47,17 +46,17 @@ public class PrefFragment extends PreferenceFragmentCompat {
                     prefListSpec.setEntries(R.array.app_math_and_cs_list);
                     prefListSpec.setEntryValues(R.array.app_math_and_cs_list_values);
                 }
-                else if(specVal.equals(getString(R.string.mech))) {
+                else if(specVal.equals(getString(R.string.mech_link))) {
                     prefListSpec.setEntries(R.array.mech_list);
-                    prefListSpec.setEntryValues(R.array.mech_list);
+                    prefListSpec.setEntryValues(R.array.mech_list_values);
                 }
                 else if(specVal.equals(getString(R.string.fask))) {
                     prefListSpec.setEntries(R.array.fask_list);
-                    prefListSpec.setEntryValues(R.array.fask_list);
+                    prefListSpec.setEntryValues(R.array.fask_list_values);
                 }
                 else if(specVal.equals(getString(R.string.fuvt))) {
                     prefListSpec.setEntries(R.array.fuvt_list);
-                    prefListSpec.setEntryValues(R.array.fuvt_list);
+                    prefListSpec.setEntryValues(R.array.fuvt_list_values);
                 }
 
                 prefListCourse.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -115,17 +114,17 @@ public class PrefFragment extends PreferenceFragmentCompat {
                             prefListSpec.setEntries(R.array.app_math_and_cs_list);
                             prefListSpec.setEntryValues(R.array.app_math_and_cs_list_values);
                         }
-                        else if(((String) newValue).equals(getString(R.string.mech))) {
+                        else if(((String) newValue).equals(getString(R.string.mech_link))) {
                             prefListSpec.setEntries(R.array.mech_list);
-                            prefListSpec.setEntryValues(R.array.mech_list);
+                            prefListSpec.setEntryValues(R.array.mech_list_values);
                         }
                         else if(((String) newValue).equals(getString(R.string.fask))) {
                             prefListSpec.setEntries(R.array.fask_list);
-                            prefListSpec.setEntryValues(R.array.fask_list);
+                            prefListSpec.setEntryValues(R.array.fask_list_values);
                         }
                         else if(((String) newValue).equals(getString(R.string.fuvt))) {
                             prefListSpec.setEntries(R.array.fuvt_list);
-                            prefListSpec.setEntryValues(R.array.fuvt_list);
+                            prefListSpec.setEntryValues(R.array.fuvt_list_values);
                         }
                         DisciplineStorage.get(getActivity()).resetDb();
                         Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));

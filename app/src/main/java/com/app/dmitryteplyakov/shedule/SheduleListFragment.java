@@ -123,6 +123,7 @@ public class SheduleListFragment extends Fragment {
         String course = sharedPreferences.getString("course", "0");
         String stream = sharedPreferences.getString("stream", "0");
         String file_url = null;
+        String fix = getString(R.string.m);
         //Log.d("PARSERHTML", pageParser());
 
         Log.d("sheduleDownloader", "SHEET: " + Integer.toString(sheet));
@@ -136,8 +137,20 @@ public class SheduleListFragment extends Fragment {
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.select_started_hint_snackbar), Snackbar.LENGTH_LONG).show();
             return false;
         }
+        Log.d("ERERRE", spec);
+        String urlPart = null;
         try {
-            file_url = "http://mstuca.ru/students/schedule/" + URLEncoder.encode((faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls"), "UTF-8").replaceAll("\\+", "%20").replaceAll("%2F", "/");
+            if(!faculty.equals(getString(R.string.mech_link)) && !spec.equals(getString(R.string.rst)) && !spec.equals(getString(R.string.uvdbobp)))
+                urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
+            else if(faculty.equals(getString(R.string.mech_link)))
+                urlPart = faculty + "/" + fix + "/" + spec + " " + course + "-" + stream + ".xls";
+            else if(spec.equals(getString(R.string.rst)))
+                urlPart = faculty + "/" + getString(R.string.rs) + "/" + spec + " " + course + "-" + stream + ".xls";
+            else if(spec.equals(getString(R.string.uvdbobp)))
+                urlPart = faculty + "/" + getString(R.string.uvd) + "/" + getString(R.string.uvd) + " " + course + "-" + stream + " " + getString(R.string.obp) +".xls";
+
+
+            file_url = "http://mstuca.ru/students/schedule/" + URLEncoder.encode(urlPart, "UTF-8").replaceAll("\\+", "%20").replaceAll("%2F", "/");
         } catch(UnsupportedEncodingException e) {
 
         }
@@ -425,6 +438,8 @@ public class SheduleListFragment extends Fragment {
 
                 }
             }
+
+            List<Calendar> excludeCals = new ArrayList<>();
             boolean isExclude = false;
             if (!exclusePart.equals("")) {
                 dateFormatter.applyPattern("dd.MM");
@@ -451,7 +466,7 @@ public class SheduleListFragment extends Fragment {
                         exclCal.set(Calendar.MINUTE, 0);
                         exclCal.set(Calendar.SECOND, 0);
                         exclCal.set(Calendar.MILLISECOND, 0);
-                        onceCalendars.add(exclCal);
+                        excludeCals.add(exclCal);
                     }
                     if (arrayParts.size() != 0)
                         isExclude = true;
@@ -553,11 +568,20 @@ public class SheduleListFragment extends Fragment {
                                 break;
                         }
 
-                        if (isExclude)
-                            if ((int) onceCalendars.get(i).get(Calendar.DAY_OF_MONTH) == DAY && (int) onceCalendars.get(i).get(Calendar.MONTH) == MONTH) {
-                                Log.d("SLF", "EXCLUDE!" + onceCalendars.get(i).getTime().toString() + " TITLE: " + disciplineTitle);
-                                continue;
+                        if (isExclude) {
+                            //if ((int) onceCalendars.get(i).get(Calendar.DAY_OF_MONTH) == DAY && (int) onceCalendars.get(i).get(Calendar.MONTH) == MONTH) {
+                            //for(Calendar calendarExc : excludeCals) {
+                            int j = 0;
+                            for(j = 0; j < excludeCals.size(); j++) {
+                                if ((int) excludeCals.get(j).get(Calendar.DAY_OF_MONTH) == DAY && (int) excludeCals.get(j).get(Calendar.MONTH) == MONTH) {
+                                    Log.d("SLF", "EXCLUDE!" + excludeCals.get(j).getTime().toString() + " TITLE: " + disciplineTitle);
+                                    break;
+                                }
                             }
+                            if(j < excludeCals.size())
+                                continue;
+                            //}
+                        }
 
 
                         int weekInt = 2;
@@ -779,6 +803,9 @@ public class SheduleListFragment extends Fragment {
             //    forcedUpdate = true;
             //    Log.d("Thread CHECKSTARTER", "SHEET INDEX: " + Integer.toString(i));
             //    checkStarter(localContext, i);
+            if(DisciplineStorage.get(localContext).getDisciplines().size() == 0)
+                forcedUpdate = true;
+            Log.d("AsyncLoader", "Forced update: " + Boolean.toString(forcedUpdate));
             checkStarter(localContext, 0);
             if(turnOff)
                 return null;

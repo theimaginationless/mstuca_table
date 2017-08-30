@@ -4,7 +4,7 @@
         android:title="@string/faculty"
         android:key="faculty"
         android:entries="@array/faculties"
-        android:entryValues="@array/faculties"/>
+        android:entryValues="@array/faculties_values"/>
     <ListPreference
         android:title="@string/spec"
         android:enabled="false"

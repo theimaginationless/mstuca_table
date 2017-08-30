@@ -33,10 +33,19 @@
     <string name="faculty">Факультет</string>
     <array name="faculties">
         <item>@string/appmath_and_cs</item>
-        <!--<item>@string/mech</item>
+        <item>@string/mech</item>
         <item>@string/fask</item>
-        <item>@string/fuvt</item>-->
+        <item>@string/fuvt</item>
     </array>
+
+    <array name="faculties_values">
+        <item>@string/appmath_and_cs</item>
+        <item>@string/mech_link</item>
+        <item>@string/fask</item>
+        <item>@string/fuvt</item>
+    </array>
+    <string name="mech_link">"Механический факультет"</string>
+
     <string name="appmath_and_cs">"Факультет прикладной математики и вычислительной техники (ФПМиВТ)"</string>
     <string name="mech">"Механический факультет"</string>
     <string name="fask">"Факультет авиационных систем и комплексов (ФАСК)"</string>
@@ -56,10 +65,42 @@
 
     <array name="mech_list">
         <item>@string/m</item>
+        <item>@string/btp</item>
+        <item>@string/mb</item>
+        <item>@string/mbu</item>
+        <item>@string/mmag</item>
     </array>
+
+    <string name="m">М</string>
+    <string name="btp">БТП</string>
+    <string name="mb">Мб</string>
+    <string name="mbu">Мбу</string>
+    <string name="mmag">Ммаг</string>
+
+    <string name="mv">М</string>
+    <string name="btpv">БТП</string>
+    <string name="mbv">Мб</string>
+    <string name="mbuv">Мбу</string>
+    <string name="mmagv">Ммаг</string>
+
+    <array name="mech_list_values">
+        <item>@string/mv</item>
+        <item>@string/btpv</item>
+        <item>@string/mbv</item>
+        <item>@string/mbuv</item>
+        <item>@string/mmagv</item>
+    </array>
+
+    <array name="fask_list_values">
+        <item>@string/akb</item>
+        <item>@string/akmag</item>
+        <item>@string/rst</item>
+    </array>
+
 
     <array name="fask_list">
         <item>@string/ak</item>
+        <item>@string/akmag</item>
         <item>@string/rs</item>
     </array>
 
@@ -69,19 +110,36 @@
         <item>@string/op</item>
         <item>@string/so</item>
         <item>@string/uvd</item>
+        <item>@string/uvdbobp</item>
         <item>@string/ek</item>
-
     </array>
+
+    <array name="fuvt_list_values">
+        <item>@string/opb</item>
+        <item>@string/sob</item>
+        <item>@string/uvdb</item>
+        <item>@string/uvdbobp</item>
+        <item>@string/ekb</item>
+    </array>
+    <string name="obp">(ОБП)</string>
 
     <string name="app_math_val">ПМб</string>
     <string name="bi_val">БИТ</string>
     <string name="evm_val">ЭВМб</string>
+    <string name="opb">ОПб</string>
+    <string name="sob">СОб</string>
+    <string name="uvdb">УВДб</string>
+    <string name="uvdbobp">УВДб (ОБП)</string>
+    <string name="ekb">ЭКб</string>
+
+    <string name="akb">АКб</string>
+    <string name="rst">РТ</string>
 
 
     <string name="app_math">ПМ</string>
     <string name="bi">БИ</string>
     <string name="evm">ЭВМ</string>
-    <string name="m">М</string>
+    <string name="akmag">АКМаг</string>
     <string name="ak">АК</string>
     <string name="rs">РС</string>
 
@@ -89,6 +147,10 @@
     <string name="so">СО</string>
     <string name="uvd">УВД</string>
     <string name="ek">ЭК</string>
+
+
+
+
     <string name="select_started_hint_snackbar">Выберите факультет в настройках</string>
 
     <string name="update_toolbar">Обновить</string>
