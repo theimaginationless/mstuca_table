@@ -31,6 +31,10 @@ import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.xml.sax.Parser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -98,6 +102,19 @@ public class SheduleListFragment extends Fragment {
         isDbDrop = true;
     }
 
+    /*public String pageParser() {
+        String links = null;
+        try {
+            Document doc = Jsoup.connect("http://mstuca.ru/students/schedule/").get();
+            Elements metaElements = doc.select("a.section-title");
+            links = metaElements.html();
+            return links;
+        } catch(IOException e) {
+
+        }
+        return links;
+    }*/
+
 
     private boolean downloadFile(Context mContext, int sheet) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -106,6 +123,7 @@ public class SheduleListFragment extends Fragment {
         String course = sharedPreferences.getString("course", "0");
         String stream = sharedPreferences.getString("stream", "0");
         String file_url = null;
+        //Log.d("PARSERHTML", pageParser());
 
         Log.d("sheduleDownloader", "SHEET: " + Integer.toString(sheet));
         if(sheet != 0 && isNotGlobalChanges) {
