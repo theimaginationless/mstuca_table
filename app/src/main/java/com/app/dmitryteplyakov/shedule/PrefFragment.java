@@ -42,20 +42,21 @@ public class PrefFragment extends PreferenceFragmentCompat {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
                         DisciplineStorage.get(getActivity()).resetDb();
-                        Log.d("Pref", "Subgroup is changed. Drop DB!");
+                        Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
                         SheduleListFragment.setIsCourseChanged(true);
                         return true;
                     }
                 });
-                /*ListPreference prefListFaculty = (ListPreference) findPreference("faculty");
+                ListPreference prefListFaculty = (ListPreference) findPreference("faculty");
                 final ListPreference prefListSpec = (ListPreference) findPreference("spec");
                 final ListPreference prefListStream = (ListPreference) findPreference("stream");
-                final ListPreference prefListCourse = (ListPreference) findPreference("course");
 
-                if(!sharedPreferences.getString("spec", "0").equals("0")) {
+                if(!sharedPreferences.getString("course", "0").equals("0")) {
+                    prefListCourse.setEnabled(true);
                     prefListlang.setEnabled(true);
                     prefListLab.setEnabled(true);
-                    prefListCourse.setEnabled(true);
+                    prefListStream.setEnabled(true);
+                    prefListSpec.setEnabled(true);
                 }
 
                 prefListStream.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -63,6 +64,10 @@ public class PrefFragment extends PreferenceFragmentCompat {
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
                         prefListlang.setEnabled(true);
                         prefListLab.setEnabled(true);
+                        prefListCourse.setEnabled(true);
+                        DisciplineStorage.get(getActivity()).resetDb();
+                        Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                        SheduleListFragment.setIsCourseChanged(true);
                         return true;
                     }
                 });
@@ -71,9 +76,10 @@ public class PrefFragment extends PreferenceFragmentCompat {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
                         prefListStream.setEnabled(true);
-                        Log.d("Pref", "Subgroup is changed. Drop DB!");
                         DisciplineStorage.get(getActivity()).resetDb();
-                        prefListCourse.setEnabled(true);
+                        Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                        SheduleListFragment.setIsCourseChanged(true);
+
                         return true;
 
                     }
@@ -88,8 +94,6 @@ public class PrefFragment extends PreferenceFragmentCompat {
                             prefListSpec.setEntries(R.array.app_math_and_cs_list);
                             prefListSpec.setEntryValues(R.array.app_math_and_cs_list_values);
                         }
-                        Log.d("Pref", "Subgroup is changed. Drop DB!");
-                        DisciplineStorage.get(getActivity()).resetDb();
                         else if(((String) newValue).equals(getString(R.string.mech))) {
                             prefListSpec.setEntries(R.array.mech_list);
                             prefListSpec.setEntryValues(R.array.mech_list);
@@ -102,18 +106,32 @@ public class PrefFragment extends PreferenceFragmentCompat {
                             prefListSpec.setEntries(R.array.fuvt_list);
                             prefListSpec.setEntryValues(R.array.fuvt_list);
                         }
+                        DisciplineStorage.get(getActivity()).resetDb();
+                        Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                        SheduleListFragment.setIsCourseChanged(true);
 
                         return true;
                     }
                 });
-        */
+
+                prefListCourse.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        prefListLab.setEnabled(true);
+                        prefListlang.setEnabled(true);
+                        DisciplineStorage.get(getActivity()).resetDb();
+                        Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                        SheduleListFragment.setIsCourseChanged(true);
+                        return true;
+                    }
+                });
 
                 prefListlang.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newVal) {
                         if(!firstListLangValue.equals((String) newVal)) {
-                            Log.d("Pref", "Subgroup is changed. Drop DB!");
                             DisciplineStorage.get(getActivity()).resetDb();
+                            Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
                         }
                         return true;
                     }
@@ -122,8 +140,8 @@ public class PrefFragment extends PreferenceFragmentCompat {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newVal) {
                         if(!firstListLabValue.equals((String) newVal)) {
-                            Log.d("Pref", "Subgroup is changed. Drop DB!");
                             DisciplineStorage.get(getActivity()).resetDb();
+                            Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
                         }
                         return true;
                     }

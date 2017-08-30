@@ -1,29 +1,21 @@
 package com.app.dmitryteplyakov.shedule;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,11 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.app.dmitryteplyakov.shedule.Core.Discipline;
 import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
@@ -50,11 +38,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -104,26 +93,39 @@ public class SheduleListFragment extends Fragment {
     }
 
 
-    private boolean downloadFile(Context mContext) {
+    private boolean downloadFile(Context mContext, int sheet) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        /*String faculty = sharedPreferences.getString("faculty", "0");
+        String faculty = sharedPreferences.getString("faculty", "0");
         String spec = sharedPreferences.getString("spec", "0");
         String course = sharedPreferences.getString("course", "0");
-        String stream = sharedPreferences.getString("stream", "0");*/
-        String faculty = getString(R.string.appmath_and_cs);
-        String spec = getString(R.string.app_math_val);
-        String course = sharedPreferences.getString("course", "0");
-        String stream = getString(R.string.first);
+        String stream = sharedPreferences.getString("stream", "0");
+        //String faculty = getString(R.string.appmath_and_cs);
+        //String spec = getString(R.string.app_math_val);
+        //String course = sharedPreferences.getString("course", "0");
+        //String stream = getString(R.string.first);
         String file_url = null;
-        //file_url = "http://mstuca.ru/students/schedule/Факультет прикладной математики и вычислительной техники (ФПМиВТ)/ПМ/ПМб 2-1.xls".replaceAll(" ", "%20");
+
+        //file_url = "http://mstuca.ru/students/schedule/Факультет прикладной математики и вычислительной техники (ФПМиВТ)/ПМ/ПМб 2-1.xls";
+
+        java.net.URL url2 = null;
+        try {
+            url2 = new java.net.URL(file_url);
+        } catch(MalformedURLException e) {
+
+        }
         //file_url = "http://mstuca.ru/students/schedule/webdav_bizproc_history_get/35345/35345/?force_download=1";
         if (course.equals("0")) {
             turnOff = true;
-            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.select_course_snackbar), Snackbar.LENGTH_LONG).show();
+            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.select_started_hint_snackbar), Snackbar.LENGTH_LONG).show();
             return false;
         }
-        file_url = ("http://mstuca.ru/students/schedule/" + faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls").replaceAll(" ", "%20");
-        //Log.d("SLFDownloader", "Check " + file_url);
+        try {
+            file_url = "http://mstuca.ru/students/schedule/" + URLEncoder.encode((faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls"), "UTF-8").replaceAll("\\+", "%20").replaceAll("%2F", "/");
+        } catch(UnsupportedEncodingException e) {
+
+        }
+        //file_url = "http://mstuca.ru/students/schedule/%D0%A4%D0%B0%D0%BA%D1%83%D0%BB%D1%8C%D1%82%D0%B5%D1%82%20%D0%BF%D1%80%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%BD%D0%BE%D0%B9%20%D0%BC%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B8%20%D0%B8%20%D0%B2%D1%8B%D1%87%D0%B8%D1%81%D0%BB%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D0%B9%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B8%20(%D0%A4%D0%9F%D0%9C%D0%B8%D0%92%D0%A2)/%D0%9F%D0%9C/%D0%9F%D0%9C%D0%B1%202-1.xls";
+        Log.d("SLFDownloader", "Check " + file_url);
         /*if(course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
             Log.d("SLFDownloader", "Data isn't fully!");
             return false;
@@ -139,14 +141,20 @@ public class SheduleListFragment extends Fragment {
         try {
             URL url = new URL(file_url);
             URLConnection connection = url.openConnection();
+            Log.d("URL", connection.getURL().toString());
             input = connection.getInputStream();
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            input = connection.getInputStream();
+            Log.d("sheduleDownloader", "Type: " + con.getContentType() + " RESP: " + con.getResponseCode() + " RESPMSG: " + con.getResponseMessage());
+
 
             String lastModRemoteString = connection.getHeaderField("Last-Modified");
             SimpleDateFormat dateformatter = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             Date lastModRemote = new Date(connection.getLastModified());
-            File localFile = new File(mContext.getFilesDir() + "/" + filename);
+            File localFile = new File(mContext.getFilesDir(), filename);
             Log.d("Already?", Boolean.toString(localFile.exists()));
-            if (isDbDrop && localFile.exists() &&!isCourseChanged)
+            Log.d("Course changed?", Boolean.toString(isCourseChanged));
+            if (isDbDrop && localFile.exists() && !isCourseChanged)
                 return true;
 
             if (!forcedUpdate && !isCourseChanged) {
@@ -155,7 +163,6 @@ public class SheduleListFragment extends Fragment {
                     localeShedule = mContext.openFileInput(filename);
                     Date lastModLocal = new Date(localFile.lastModified());
                     Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
-
                     if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
                         if (swipeRefresh)
                             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
@@ -165,9 +172,15 @@ public class SheduleListFragment extends Fragment {
                     }
                 }
             }
-            setIsCourseChanged(false);
+            if(sheet != 0) {
+                Log.d("sheduleDownloader", "Is not common shedule. Skip downloading...");
+                return true;
+            }
+
             forcedUpdate = false;
-            Log.d("DOWN", "HERE");
+
+
+
 
             output = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
 
@@ -175,6 +188,8 @@ public class SheduleListFragment extends Fragment {
             byte[] data = new byte[1024];
             while ((read = input.read(data)) != -1) output.write(data, 0, read);
             output.flush();
+
+
             if (swipeRefresh)
                 Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_updated), Snackbar.LENGTH_SHORT).show();
             return true;
@@ -220,7 +235,7 @@ public class SheduleListFragment extends Fragment {
         String disciplineType;
         String teacherName;
         String aud;
-        Calendar year = Calendar.getInstance();
+        Calendar year = Calendar.getInstance(new Locale("ru"));
         year.setTime(new Date());
         List<String> parsedStrList = null;
         HSSFWorkbook myShedule = null;
@@ -338,7 +353,7 @@ public class SheduleListFragment extends Fragment {
                 //int sliceIndex = date.indexOf("|");
                 //Log.d("SLF", Integer.toString(sliceIndex));
                 //firstPart = date.substring(0, sliceIndex);
-                Calendar cal = Calendar.getInstance();
+                Calendar cal = Calendar.getInstance(new Locale("ru"));
                 firstPart = date;
                 //secondPart = date.substring(sliceIndex + 1);
             }
@@ -364,7 +379,7 @@ public class SheduleListFragment extends Fragment {
                     }
                     for (String str : arrayParts) {
                         Log.d("SLF", "STR FOR ONCE CALENDARS: " + str);
-                        Calendar onceCal = Calendar.getInstance();
+                        Calendar onceCal = Calendar.getInstance(new Locale("ru"));
                         //onceCal.setTime(firstDate);
                         Date current = dateFormatter.parse(str);
                         onceCal.setTime(current);
@@ -381,7 +396,7 @@ public class SheduleListFragment extends Fragment {
                 firstDate = dateFormatter.parse(firstPart);
             } catch (ParseException e) {
             }
-            startCalendar = Calendar.getInstance();
+            startCalendar = Calendar.getInstance(new Locale("ru"));
             startCalendar.setTime(firstDate);
             startCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
             startCalendar.setFirstDayOfWeek(Calendar.MONDAY);
@@ -397,7 +412,7 @@ public class SheduleListFragment extends Fragment {
                 dateFormatter.applyPattern("dd.MM");
                 try {
                     secondDate = dateFormatter.parse(secondPart);
-                    endCalendar = Calendar.getInstance();
+                    endCalendar = Calendar.getInstance(new Locale("ru"));
                     endCalendar.setTime(secondDate);
                     endCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
                     endCalendar.setFirstDayOfWeek(Calendar.MONDAY);
@@ -429,7 +444,7 @@ public class SheduleListFragment extends Fragment {
                     for (String str : arrayParts) {
                         Log.d("SLF", "STR FOR EXCL CALENDARS: " + str);
 
-                        Calendar exclCal = Calendar.getInstance();
+                        Calendar exclCal = Calendar.getInstance(new Locale("ru"));
                         //onceCal.setTime(firstDate);
                         Date current = dateFormatter.parse(str);
                         exclCal.setTime(current);
@@ -447,7 +462,7 @@ public class SheduleListFragment extends Fragment {
 
 
                     excludeDate = dateFormatter.parse(exclusePart);
-                    excludeCalendar = Calendar.getInstance();
+                    excludeCalendar = Calendar.getInstance(new Locale("ru"));
                     excludeCalendar.setTime(excludeDate);
                     excludeCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
                     excludeCalendar.setFirstDayOfWeek(Calendar.MONDAY);
@@ -475,7 +490,7 @@ public class SheduleListFragment extends Fragment {
             */
             if (endCalendar == null)
                 endCalendar = startCalendar;
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(new Locale("ru"));
             cal.setTime(new Date());
             cal.set(Calendar.MONTH, 11);
             cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
@@ -504,9 +519,9 @@ public class SheduleListFragment extends Fragment {
                     Log.d("SLF", "MONTH START: " + Integer.toString(MONTH + 1) + " MONTH END: " + Integer.toString(endCalendar.get(Calendar.MONTH) + 1));
                     int startDay;
                     int endDay;
-                    Calendar tempStart = Calendar.getInstance();
+                    Calendar tempStart = Calendar.getInstance(new Locale("ru"));
                     tempStart.set(Calendar.MONTH, MONTH);
-                    Calendar tempEnd = Calendar.getInstance();
+                    Calendar tempEnd = Calendar.getInstance(new Locale("ru"));
                     tempEnd.set(Calendar.MONTH, MONTH);
                     Log.d("SLF", "FIRST MONTH: " + Boolean.toString(firstMonth));
                     if (firstMonth) {
@@ -529,7 +544,7 @@ public class SheduleListFragment extends Fragment {
                     Log.d("SLF", "DAY START THIS MONTH: " + Integer.toString(startDay) + " DAY END THIS MONTH: " + Integer.toString(endDay));
                     firstMonth = false;
                     for (int DAY = startDay; DAY <= endDay; DAY++) {
-                        Calendar resultCalendar = Calendar.getInstance();
+                        Calendar resultCalendar = Calendar.getInstance(new Locale("ru"));
                         //resultCalendar.setTime(new Date());
                         diffCount++;
                         resultCalendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -541,7 +556,7 @@ public class SheduleListFragment extends Fragment {
                         resultCalendar.set(Calendar.MONTH, MONTH);
                         resultCalendar.set(Calendar.DAY_OF_MONTH, DAY);
                         resultCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
-                        Calendar sept = Calendar.getInstance();
+                        Calendar sept = Calendar.getInstance(new Locale("ru"));
                         sept.set(resultCalendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1, 0, 0, 0);
                         switch ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2) {
                             case 1:
@@ -673,7 +688,7 @@ public class SheduleListFragment extends Fragment {
             @Override
             public void run() {
                 Log.d("DownloadTask", "Download started!");
-                dSuccess = downloadFile(mContext);
+                dSuccess = downloadFile(mContext, sheet);
             }
         });
         Thread readThread = new Thread(new Runnable() {
@@ -797,6 +812,7 @@ public class SheduleListFragment extends Fragment {
             mSwipeRefreshData.setRefreshing(false);
             if (isDbDrop)
                 isDbDrop = false;
+            setIsCourseChanged(false);
             inProcess = false;
             Log.d("AsyncLoader AFTER", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
@@ -970,14 +986,14 @@ public class SheduleListFragment extends Fragment {
         @Override
         public int getItemViewType(int position) {
             if (position != 0) {
-                Calendar curr = Calendar.getInstance();
+                Calendar curr = Calendar.getInstance(new Locale("ru"));
                 curr.setTime(mDisciplines.get(position - 1).getDate());
                 curr.set(Calendar.HOUR_OF_DAY, 0);
                 curr.set(Calendar.MINUTE, 0);
                 curr.set(Calendar.SECOND, 0);
                 curr.set(Calendar.MILLISECOND, 0);
 
-                Calendar after = Calendar.getInstance();
+                Calendar after = Calendar.getInstance(new Locale("ru"));
                 after.setTime(mDisciplines.get(position).getDate());
                 after.set(Calendar.HOUR_OF_DAY, 0);
                 after.set(Calendar.MINUTE, 0);
@@ -1037,7 +1053,7 @@ public class SheduleListFragment extends Fragment {
 
     private synchronized void updateUI(Context mContext) { // Обновление интерфейса. Связывание данных с адаптером
         //List<Discipline> disciplines = DisciplineStorage.get(getActivity()).getDisciplines();
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(new Locale("ru"));
         calendar.setTime(new Date());
         //calendar.set(Calendar.MONTH, 8);
         //calendar.set(Calendar.DAY_OF_MONTH, 2);

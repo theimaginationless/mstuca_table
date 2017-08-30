@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--<ListPreference
+    <ListPreference
         android:title="@string/faculty"
         android:key="faculty"
         android:entries="@array/faculties"
@@ -10,32 +10,29 @@
         android:enabled="false"
         android:key="spec" />
     <ListPreference
-        android:title="@string/course"
-        android:key="course"
-        android:enabled="false"
-        android:entries="@array/courses"
-        android:entryValues="@array/courses"/>
-    <ListPreference
         android:title="@string/stream"
         android:enabled="false"
         android:entries="@array/streams"
         android:entryValues="@array/streams"
-        android:key="stream" /> -->
+        android:key="stream" />
     <ListPreference
         android:title="@string/course"
         android:key="course"
+        android:enabled="false"
         android:entries="@array/courses"
         android:entryValues="@array/courses"/>
     <ListPreference
         android:title="@string/subgroup_eng"
         android:key="subgroup_lang"
         android:defaultValue="@string/first"
+        android:enabled="false"
         android:entries="@array/subgroup"
         android:entryValues="@array/subgroup"/>
     <ListPreference
         android:title="@string/subgroup_lab"
         android:defaultValue="@string/first"
         android:key="subgroup_lab"
+        android:enabled="false"
         android:entries="@array/subgroup"
         android:entryValues="@array/subgroup"/>
     <SwitchPreference
