@@ -104,10 +104,6 @@ public class SheduleListFragment extends Fragment {
         String spec = sharedPreferences.getString("spec", "0");
         String course = sharedPreferences.getString("course", "0");
         String stream = sharedPreferences.getString("stream", "0");
-        //String faculty = getString(R.string.appmath_and_cs);
-        //String spec = getString(R.string.app_math_val);
-        //String course = sharedPreferences.getString("course", "0");
-        //String stream = getString(R.string.first);
         String file_url = null;
 
         Log.d("sheduleDownloader", "SHEET: " + Integer.toString(sheet));
@@ -116,15 +112,6 @@ public class SheduleListFragment extends Fragment {
             return true;
         }
 
-        //file_url = "http://mstuca.ru/students/schedule/Факультет прикладной математики и вычислительной техники (ФПМиВТ)/ПМ/ПМб 2-1.xls";
-
-        java.net.URL url2 = null;
-        try {
-            url2 = new java.net.URL(file_url);
-        } catch(MalformedURLException e) {
-
-        }
-        //file_url = "http://mstuca.ru/students/schedule/webdav_bizproc_history_get/35345/35345/?force_download=1";
         if (course.equals("0")) {
             turnOff = true;
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.select_started_hint_snackbar), Snackbar.LENGTH_LONG).show();
@@ -135,16 +122,11 @@ public class SheduleListFragment extends Fragment {
         } catch(UnsupportedEncodingException e) {
 
         }
-        //file_url = "http://mstuca.ru/students/schedule/%D0%A4%D0%B0%D0%BA%D1%83%D0%BB%D1%8C%D1%82%D0%B5%D1%82%20%D0%BF%D1%80%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%BD%D0%BE%D0%B9%20%D0%BC%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B8%20%D0%B8%20%D0%B2%D1%8B%D1%87%D0%B8%D1%81%D0%BB%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE%D0%B9%20%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B8%20(%D0%A4%D0%9F%D0%9C%D0%B8%D0%92%D0%A2)/%D0%9F%D0%9C/%D0%9F%D0%9C%D0%B1%202-1.xls";
         Log.d("SLFDownloader", "Check " + file_url);
-        /*if(course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
+        if(course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
             Log.d("SLFDownloader", "Data isn't fully!");
             return false;
-        } else {
-            Log.d("SLFDownloader", "Check " + "http://mstuca.ru/students/schedule/" + faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls");
-            //file_url = "http://mstuca.ru/students/schedule/" + faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
-            file_url = "http://mstuca.ru/students/schedule/webdav_bizproc_history_get/35345/35345/?force_download=1";
-        }*/
+        }
 
         InputStream input = null;
         FileOutputStream output = null;
@@ -218,7 +200,6 @@ public class SheduleListFragment extends Fragment {
             } catch (IOException e) {
             }
         }
-        //return true;
 
     }
 
@@ -239,14 +220,12 @@ public class SheduleListFragment extends Fragment {
             return;
         }
 
-        DisciplineStorage mDisciples = DisciplineStorage.get(getActivity());
         String disciplineTitle;
         String disciplineType;
         String teacherName;
         String aud;
         Calendar year = Calendar.getInstance(new Locale("ru"));
         year.setTime(new Date());
-        List<String> parsedStrList = null;
         HSSFWorkbook myShedule = null;
         try {
             myShedule = new HSSFWorkbook(((getActivity().openFileInput(filename))));
@@ -267,10 +246,6 @@ public class SheduleListFragment extends Fragment {
                 continue;
             }
 
-
-            //HSSFRow row = mySheduleSheet.getRow(1);
-            Discipline discipline = new Discipline();
-
             disciplineTitle = mySheduleSheet.getRow(rowIndex).getCell(2).getStringCellValue();
             disciplineType = mySheduleSheet.getRow(rowIndex + 1).getCell(2).getStringCellValue();
             teacherName = mySheduleSheet.getRow(rowIndex + 1).getCell(4).getStringCellValue();
@@ -282,15 +257,15 @@ public class SheduleListFragment extends Fragment {
             String week = "";
             String date = "";
             if (sheet != 0) {
-                if (sheet != langGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
-                    Log.d("SLF", "Пропускаем ин. Яз " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по ин. Яз: " + Integer.toString(sheet - 1));
+                if (sheet != langGroup && (disciplineType.contains("Pract") || disciplineType.contains("Lec"))) {
+                    Log.d("SLF", "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(sheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
-                    Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex + 1));
+                    Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex - 1));
                     continue;
                 }
-                if (sheet != labGroup && disciplineType.contains("Лаб.раб.")) {
-                    Log.d("SLF", "Пропускаем лабу " + disciplineTitle + " ПРЕПОД: " + teacherName + " Для подгруппы по лабам: " + Integer.toString(sheet - 1));
+                if (sheet != labGroup && disciplineType.contains("Lab")) {
+                    Log.d("SLF", "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(sheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
                     Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex + 1));
@@ -311,9 +286,7 @@ public class SheduleListFragment extends Fragment {
                 }
             }
 
-            //int number = (int) mySheduleSheet.getRow(rowIndex).getCell(0).getNumericCellValue();
             int number = 0;
-            // Numbers
             for (CellRangeAddress region : regions) {
                 if (region.isInRange(rowIndex, 0)) {
                     for (int i = 0; i <= region.getLastRow(); i++) {
@@ -343,11 +316,9 @@ public class SheduleListFragment extends Fragment {
                     int sliceIndex = date.indexOf("|");
                     int endSliceIndex = date.indexOf("|", sliceIndex + 1);
 
-                    //Log.d("SLF", "START " + Integer.toString(sliceIndex + 1) + " END " + Integer.toString(endSliceIndex + 1) + " " + " SOURCE: " + date);
                     firstPart = date.substring(0, sliceIndex);
                     secondPart = date.substring(sliceIndex + 1, endSliceIndex);
                     exclusePart = date.substring(endSliceIndex + 1);
-                    //Log.d("SLF", "FIRST: " + firstPart + " SECOND: " + secondPart + " EXCL DATA : " + Integer.toString(endSliceIndex + 1) + " SOURCE: " + date);
                 } else {
                     Log.d("SLF", "С!!!");
                     date = dateRange.replaceFirst("     с ", "").replace(" по ", "|");
@@ -359,12 +330,7 @@ public class SheduleListFragment extends Fragment {
                 Log.d("SLF", "Только!");
                 onceDiscipline = true;
                 date = dateRange.replaceFirst("     только", "");
-                //int sliceIndex = date.indexOf("|");
-                //Log.d("SLF", Integer.toString(sliceIndex));
-                //firstPart = date.substring(0, sliceIndex);
-                Calendar cal = Calendar.getInstance(new Locale("ru"));
                 firstPart = date;
-                //secondPart = date.substring(sliceIndex + 1);
             }
             dateFormatter = new SimpleDateFormat("dd.MM");
             dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -389,7 +355,6 @@ public class SheduleListFragment extends Fragment {
                     for (String str : arrayParts) {
                         Log.d("SLF", "STR FOR ONCE CALENDARS: " + str);
                         Calendar onceCal = Calendar.getInstance(new Locale("ru"));
-                        //onceCal.setTime(firstDate);
                         Date current = dateFormatter.parse(str);
                         onceCal.setTime(current);
                         onceCal.set(Calendar.YEAR, year.get(Calendar.YEAR));
@@ -439,7 +404,6 @@ public class SheduleListFragment extends Fragment {
             if (!exclusePart.equals("")) {
                 dateFormatter.applyPattern("dd.MM");
                 try {
-                    //if(exclusePart.contains(";")) {
                     int firstI = 0;
                     List<String> arrayParts = new ArrayList<>();
                     for (int i = 0; i < exclusePart.length(); i++) {
@@ -454,7 +418,6 @@ public class SheduleListFragment extends Fragment {
                         Log.d("SLF", "STR FOR EXCL CALENDARS: " + str);
 
                         Calendar exclCal = Calendar.getInstance(new Locale("ru"));
-                        //onceCal.setTime(firstDate);
                         Date current = dateFormatter.parse(str);
                         exclCal.setTime(current);
                         exclCal.set(Calendar.YEAR, year.get(Calendar.YEAR));
@@ -467,7 +430,6 @@ public class SheduleListFragment extends Fragment {
                     }
                     if (arrayParts.size() != 0)
                         isExclude = true;
-                    //}
 
 
                     excludeDate = dateFormatter.parse(exclusePart);
@@ -487,16 +449,6 @@ public class SheduleListFragment extends Fragment {
             }
             if (startCalendar == null)
                 continue;
-
-            //Log.d("SLF", "MONTH: " + endCalendar.get(Calendar.MONTH) + 1);
-            //Log.d("SLF", "DAY: " + endCalendar.get(Calendar.DAY_OF_MONTH));
-            /*calendars.add(startCalendar);
-            if (!secondPart.equals(""))
-                calendars.add(endCalendar);
-            if (!exclusePart.equals(""))
-                calendars.add(excludeCalendar);
-            //for(Calendar calendar : calendars) {
-            */
             if (endCalendar == null)
                 endCalendar = startCalendar;
             Calendar cal = Calendar.getInstance(new Locale("ru"));
@@ -542,13 +494,13 @@ public class SheduleListFragment extends Fragment {
                     if (startCalendar.get(Calendar.MONTH) == endCalendar.get(Calendar.MONTH)) {
                         startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
                         endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
-                        Log.d("SLF", "ТОЛЬКО ОДИН МЕСЯЦ ИЛИ ОДИН ДЕНЬ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                        Log.d("SLF", "ONE DAY OR MONTH ONLY! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
                     } else if (MONTH == endCalendar.get(Calendar.MONTH)) {
                         startDay = tempStart.getActualMinimum(Calendar.DAY_OF_MONTH);
                         endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
-                        Log.d("SLF", "ПОСЛЕДНИЙ МЕСЯЦ! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                        Log.d("SLF", "LAST MONTH! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
                     } else {
-                        Log.d("SLF", "ПЕРИОД! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                        Log.d("SLF", "PERIOD! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
                     }
                     Log.d("SLF", "DAY START THIS MONTH: " + Integer.toString(startDay) + " DAY END THIS MONTH: " + Integer.toString(endDay));
                     firstMonth = false;
@@ -576,7 +528,6 @@ public class SheduleListFragment extends Fragment {
                                 break;
                         }
 
-                        //if (excludeCalendar != null)
                         if (isExclude)
                             if ((int) onceCalendars.get(i).get(Calendar.DAY_OF_MONTH) == DAY && (int) onceCalendars.get(i).get(Calendar.MONTH) == MONTH) {
                                 Log.d("SLF", "EXCLUDE!" + onceCalendars.get(i).getTime().toString() + " TITLE: " + disciplineTitle);
@@ -584,7 +535,6 @@ public class SheduleListFragment extends Fragment {
                             }
 
 
-                        //resultCalendar.set(resultCalendar.get(Calendar.YEAR), MONTH, DAY - 1, 0, 0, 0);
                         int weekInt = 2;
                         if (week.equals("В"))
                             weekInt = 1;
@@ -660,15 +610,10 @@ public class SheduleListFragment extends Fragment {
                     }
                 }
                 Log.d("SLF", "COUNTER DAYS: " + Integer.toString(diffCount));
-                //}
             }
-
-            //mDisciples.addDisciple(discipline);
-            //Log.d("SLF", "STR: " + disciplineTitle + " TYPE: " + disciplineType + " TEACHER: " + teacherName + " AUD: " + aud + " DATE: " + firstDate.toString() + " " + secondDate.toString() + " NUM: " + Integer.toString(number));
             rowIndex += 2;
             onceDiscipline = false;
             Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 3) + " NEW: " + Integer.toString(rowIndex));
-            //break;
         }
     }
 
