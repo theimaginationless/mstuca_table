@@ -63,6 +63,8 @@
         <item>@string/rs</item>
     </array>
 
+    <string name="filenotfound_snackbar">Ошибка. Проверьте правильность настроек.</string>
+
     <array name="fuvt_list">
         <item>@string/op</item>
         <item>@string/so</item>

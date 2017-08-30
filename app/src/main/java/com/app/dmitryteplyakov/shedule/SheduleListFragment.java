@@ -34,6 +34,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -187,9 +188,15 @@ public class SheduleListFragment extends Fragment {
 
         } catch (UnknownHostException e) {
             Log.e("SLFDownloader", "Wrong address or cannot connecting to internet?", e);
+            turnOff = true;
             return false;
-        } catch (IOException e) {
+        } catch(FileNotFoundException e) {
+            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.filenotfound_snackbar), Snackbar.LENGTH_LONG).show();
+            turnOff = true;
+            return false;
+        } catch(IOException e) {
             Log.e("SheduleDownloader", "Error IO " + e);
+            turnOff = true;
             return false;
         } finally {
             try {
