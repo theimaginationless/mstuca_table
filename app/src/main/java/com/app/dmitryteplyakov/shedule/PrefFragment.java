@@ -37,6 +37,28 @@ public class PrefFragment extends PreferenceFragmentCompat {
                 final String firstListLangValue = sharedPreferences.getString("subgroup_lang", getString(R.string.first));
                 final String firstListLabValue = sharedPreferences.getString("subgroup_lab", getString(R.string.first));
                 final ListPreference prefListCourse = (ListPreference) findPreference("course");
+                ListPreference prefListFaculty = (ListPreference) findPreference("faculty");
+                final ListPreference prefListSpec = (ListPreference) findPreference("spec");
+                final ListPreference prefListStream = (ListPreference) findPreference("stream");
+
+                String specVal = sharedPreferences.getString("faculty", "0");
+
+                if(specVal.equals(getString(R.string.appmath_and_cs))) {
+                    prefListSpec.setEntries(R.array.app_math_and_cs_list);
+                    prefListSpec.setEntryValues(R.array.app_math_and_cs_list_values);
+                }
+                else if(specVal.equals(getString(R.string.mech))) {
+                    prefListSpec.setEntries(R.array.mech_list);
+                    prefListSpec.setEntryValues(R.array.mech_list);
+                }
+                else if(specVal.equals(getString(R.string.fask))) {
+                    prefListSpec.setEntries(R.array.fask_list);
+                    prefListSpec.setEntryValues(R.array.fask_list);
+                }
+                else if(specVal.equals(getString(R.string.fuvt))) {
+                    prefListSpec.setEntries(R.array.fuvt_list);
+                    prefListSpec.setEntryValues(R.array.fuvt_list);
+                }
 
                 prefListCourse.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
@@ -47,9 +69,7 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         return true;
                     }
                 });
-                ListPreference prefListFaculty = (ListPreference) findPreference("faculty");
-                final ListPreference prefListSpec = (ListPreference) findPreference("spec");
-                final ListPreference prefListStream = (ListPreference) findPreference("stream");
+
 
                 if(!sharedPreferences.getString("course", "0").equals("0")) {
                     prefListCourse.setEnabled(true);
@@ -132,6 +152,7 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         if(!firstListLangValue.equals((String) newVal)) {
                             DisciplineStorage.get(getActivity()).resetDb();
                             Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                            SheduleListFragment.setIsNotGlobalChanges(true);
                         }
                         return true;
                     }
@@ -142,6 +163,7 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         if(!firstListLabValue.equals((String) newVal)) {
                             DisciplineStorage.get(getActivity()).resetDb();
                             Log.d("Pref", "Subgroup is changed. Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                            SheduleListFragment.setIsNotGlobalChanges(true);
                         }
                         return true;
                     }

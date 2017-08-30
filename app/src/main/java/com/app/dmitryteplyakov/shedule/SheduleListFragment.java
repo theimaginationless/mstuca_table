@@ -83,6 +83,11 @@ public class SheduleListFragment extends Fragment {
     private static boolean isCourseChanged;
     private static final int REQUEST_DATE = 5;
     private static final String DIALOG_DATE = "com.app.shedulelistfragment.dialog_date";
+    private static boolean isNotGlobalChanges;
+
+    public static void setIsNotGlobalChanges(boolean isNotGlobalChanges) {
+        SheduleListFragment.isNotGlobalChanges = isNotGlobalChanges;
+    }
 
     public static void setIsCourseChanged(boolean state) {
         isCourseChanged = state;
@@ -104,6 +109,12 @@ public class SheduleListFragment extends Fragment {
         //String course = sharedPreferences.getString("course", "0");
         //String stream = getString(R.string.first);
         String file_url = null;
+
+        Log.d("sheduleDownloader", "SHEET: " + Integer.toString(sheet));
+        if(sheet != 0 && isNotGlobalChanges) {
+            Log.d("sheduleDownloader", "Is not global changes in shedule. Skip downloading...");
+            return true;
+        }
 
         //file_url = "http://mstuca.ru/students/schedule/Факультет прикладной математики и вычислительной техники (ФПМиВТ)/ПМ/ПМб 2-1.xls";
 
@@ -154,6 +165,8 @@ public class SheduleListFragment extends Fragment {
             File localFile = new File(mContext.getFilesDir(), filename);
             Log.d("Already?", Boolean.toString(localFile.exists()));
             Log.d("Course changed?", Boolean.toString(isCourseChanged));
+
+
             if (isDbDrop && localFile.exists() && !isCourseChanged)
                 return true;
 
@@ -171,10 +184,6 @@ public class SheduleListFragment extends Fragment {
                         return false;
                     }
                 }
-            }
-            if(sheet != 0) {
-                Log.d("sheduleDownloader", "Is not common shedule. Skip downloading...");
-                return true;
             }
 
             forcedUpdate = false;
@@ -687,6 +696,10 @@ public class SheduleListFragment extends Fragment {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                if(isNotGlobalChanges) {
+                    dSuccess = isNotGlobalChanges;
+                    return;
+                }
                 Log.d("DownloadTask", "Download started!");
                 dSuccess = downloadFile(mContext, sheet);
             }
@@ -735,7 +748,7 @@ public class SheduleListFragment extends Fragment {
     private void checkStarter(Context mContext, int sheet) {
         Thread thread = null;
 
-        if (isOnline()) {
+        if (isOnline() || isNotGlobalChanges) {
             workingOn(mContext, sheet);
         } else {
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
@@ -799,6 +812,7 @@ public class SheduleListFragment extends Fragment {
             checkStarter(localContext, 0);
             if(turnOff)
                 return null;
+            setIsNotGlobalChanges(true);
             checkStarter(localContext, 2);
             checkStarter(localContext, 3);
             //}
@@ -813,6 +827,7 @@ public class SheduleListFragment extends Fragment {
             if (isDbDrop)
                 isDbDrop = false;
             setIsCourseChanged(false);
+            setIsNotGlobalChanges(false);
             inProcess = false;
             Log.d("AsyncLoader AFTER", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
             super.onPostExecute(result);
