@@ -295,14 +295,14 @@ public class SheduleListFragment extends Fragment {
             String week = "";
             String date = "";
             if (sheet != 0) {
-                if (sheet != langGroup && (disciplineType.contains("Pract") || disciplineType.contains("Lec"))) {
+                if (sheet != langGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
                     Log.d("SLF", "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(sheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
                     Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex - 1));
                     continue;
                 }
-                if (sheet != labGroup && disciplineType.contains("Lab")) {
+                if (sheet != labGroup && disciplineType.contains("Лаб.раб.")) {
                     Log.d("SLF", "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(sheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
