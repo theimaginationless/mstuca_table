@@ -670,9 +670,9 @@ public class SheduleListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            notFirstRun = (boolean) savedInstanceState.getSerializable(EXTRA_SAVED);
-        }
+        //if (savedInstanceState != null) {
+        //    notFirstRun = (boolean) savedInstanceState.getSerializable(EXTRA_SAVED);
+        //}
         setRetainInstance(true);
 
 
