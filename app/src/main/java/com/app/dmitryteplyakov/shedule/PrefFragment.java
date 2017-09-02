@@ -99,7 +99,6 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
                         SheduleListFragment.setIsCourseChanged(true);
 
-
                         return true;
 
                     }
@@ -142,6 +141,7 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         DisciplineStorage.get(getActivity()).resetDb();
                         Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
                         SheduleListFragment.setIsCourseChanged(true);
+                        SheduleListFragment.setResetPosition(true);
                         return true;
                     }
                 });
@@ -152,7 +152,6 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         if(!firstListLangValue.equals((String) newVal)) {
                             DisciplineStorage.get(getActivity()).resetDb();
                             Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
-                            SheduleListFragment.setIsNotGlobalChanges(true);
                         }
                         return true;
                     }
@@ -163,7 +162,6 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         if(!firstListLabValue.equals((String) newVal)) {
                             DisciplineStorage.get(getActivity()).resetDb();
                             Log.d("Pref", "SDrop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
-                            SheduleListFragment.setIsNotGlobalChanges(true);
                         }
                         return true;
                     }

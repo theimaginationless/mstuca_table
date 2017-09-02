@@ -89,6 +89,11 @@ public class SheduleListFragment extends Fragment {
     private static final int REQUEST_DATE = 5;
     private static final String DIALOG_DATE = "com.app.shedulelistfragment.dialog_date";
     private static boolean isNotGlobalChanges;
+    private static boolean resetPosition;
+
+    public static void setResetPosition(boolean resetPositionArg) {
+        resetPosition = resetPositionArg;
+    }
 
     public static void setIsNotGlobalChanges(boolean isNotGlobalChanges) {
         SheduleListFragment.isNotGlobalChanges = isNotGlobalChanges;
@@ -670,9 +675,10 @@ public class SheduleListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //if (savedInstanceState != null) {
-        //    notFirstRun = (boolean) savedInstanceState.getSerializable(EXTRA_SAVED);
-        //}
+        if (savedInstanceState != null) {
+            if(savedInstanceState.getSerializable(EXTRA_SAVED) != null)
+                notFirstRun = (boolean) savedInstanceState.getSerializable(EXTRA_SAVED);
+        }
         setRetainInstance(true);
 
 
@@ -824,6 +830,20 @@ public class SheduleListFragment extends Fragment {
             if (isDbDrop)
                 isDbDrop = false;
             setIsCourseChanged(false);
+            if(resetPosition) {
+                Log.d("AsyncLoader", "Thread closed.");
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        int pos = DisciplineStorage.get(getActivity()).countDisciplinesToDate(new Date(), null);
+                        smoothScroller.setTargetPosition(pos);
+                        //linearLayoutManager.startSmoothScroll(smoothScroller);
+                        //gridLayoutManager.startSmoothScroll(smoothScroller);
+                        linearLayoutManager.scrollToPositionWithOffset(pos, 0);
+                    }
+                });
+            }
+            setResetPosition(false);
             setIsNotGlobalChanges(false);
             inProcess = false;
             Log.d("AsyncLoader AFTER", Integer.toString(DisciplineStorage.get(localContext).getDisciplines().size()));
