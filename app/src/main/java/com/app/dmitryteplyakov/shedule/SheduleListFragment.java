@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
@@ -90,6 +91,7 @@ public class SheduleListFragment extends Fragment {
     private static final String DIALOG_DATE = "com.app.shedulelistfragment.dialog_date";
     private static boolean isNotGlobalChanges;
     private static boolean resetPosition;
+    private DividerItemDecoration mDividerItemDecorator;
 
     public static void setResetPosition(boolean resetPositionArg) {
         resetPosition = resetPositionArg;
@@ -875,6 +877,9 @@ public class SheduleListFragment extends Fragment {
 
             }
         });
+        mDividerItemDecorator = new DividerItemDecoration(mRecyclerView.getContext(), linearLayoutManager.getOrientation());
+        mRecyclerView.addItemDecoration(mDividerItemDecorator);
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         //if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
