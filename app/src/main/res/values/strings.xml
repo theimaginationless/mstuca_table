@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MSTUCA</string>
+    <string name="app_name">МГТУ ГА Расписание</string>
     <string name="settings">Настройки</string>
     <string name="waiting_text">Подождите...</string>
     <string name="error_connection">Проверьте соединение с интернетом</string>
@@ -151,7 +151,7 @@
 
 
 
-    <string name="select_started_hint_snackbar">Выберите факультет в настройках</string>
+    <string name="select_started_hint_snackbar">Выберите группу и курс в настройках</string>
 
     <string name="update_toolbar">Обновить</string>
     <string name="check_update_when_start">Проверять обновление расписания при запуске</string>
