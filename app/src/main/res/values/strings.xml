@@ -12,6 +12,8 @@
     <string name="second">"2"</string>
     <string name="three">"3"</string>
     <string name="four">"4"</string>
+    <string name="five">"5"</string>
+
     <string-array name="subgroup">
         <item>@string/first</item>
         <item>@string/second</item>
@@ -22,6 +24,7 @@
         <item>@string/second</item>
         <item>@string/three</item>
         <item>@string/four</item>
+        <item>@string/five</item>
     </array>
     <string name="stream">Поток</string>
     <array name="streams">
@@ -155,6 +158,5 @@
 
     <string name="update_toolbar">Обновить</string>
     <string name="check_update_when_start">Проверять обновление расписания при запуске</string>
-    <string name="about">Developed by Dmitry Teplyakov</string>
     <string name="open_calendar_toolbar">Открыть календарь</string>
 </resources>
