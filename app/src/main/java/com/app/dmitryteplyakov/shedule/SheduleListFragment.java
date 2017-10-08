@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.DividerItemDecoration;
@@ -943,13 +945,13 @@ public class SheduleListFragment extends Fragment {
             mDurationTime = (TextView) itemView.findViewById(R.id.start_time);
             mDate = (TextView) itemView.findViewById(R.id.date);
             mPairNumber = (TextView) itemView.findViewById(R.id.pair_counter);
+
         }
 
         public void bindShedule(Discipline discipline) {
             mDiscipline = discipline;
             mTeacherNameTextView.setText(discipline.getTeacherName());
             mDiscipleNameTextView.setText(discipline.getDiscipleName());
-
             mAuditoryTextView.setText(discipline.getAuditoryNumber());
             mLectureTypeTextView.setText(discipline.getType());
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");
@@ -993,8 +995,6 @@ public class SheduleListFragment extends Fragment {
             mDiscipline = discipline;
             mTeacherNameTextView.setText(discipline.getTeacherName());
             mDiscipleNameTextView.setText(discipline.getDiscipleName());
-
-
             mAuditoryTextView.setText(discipline.getAuditoryNumber());
             mLectureTypeTextView.setText(discipline.getType());
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");

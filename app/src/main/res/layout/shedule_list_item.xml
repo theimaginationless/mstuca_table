@@ -16,7 +16,7 @@
             style="?android:textAppearanceLarge"
             android:gravity="center"
             tools:text="3"
-            android:textColor="#505050"
+            android:textColor="@color/colorPairNumber"
             android:background="@drawable/bg_circle"
             android:layout_width="30dp"
             android:layout_height="30dp"/>
