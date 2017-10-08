@@ -267,11 +267,15 @@ public class SheduleListFragment extends Fragment {
         try {
             myShedule = new HSSFWorkbook(((getActivity().openFileInput(filename))));
         } catch (IOException e) {
-            Log.e("sheduleReader", "Error read shedule file!");
+            Log.e("scheduleReader", "Error read schedule file!");
         }
-        if(myShedule.getNumberOfSheets() < sheet + 1) {
-            Log.d("sheduleReader", "Done.");
-            return;
+        try {
+            if (myShedule.getNumberOfSheets() < sheet + 1) {
+                Log.d("scheduleReader", "Done.");
+                return;
+            }
+        } catch(NullPointerException e) {
+            Log.e("scheduleReader", "NPE (monitoring need): " + "sheetNumber: " + Integer.toString(sheet + 1) + " isNew: " + Boolean.toString(isNew) + " Lab/Lang group: " + Integer.toString(labGroup) + "/" + Integer.toString(langGroup), e);
         }
         HSSFSheet mySheduleSheet = myShedule.getSheetAt(sheet);
 
@@ -1138,6 +1142,7 @@ public class SheduleListFragment extends Fragment {
                     if (DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()) != null)
                         id = DisciplineStorage.get(getActivity()).getDiscipleByDate(new Date()).getId();
                     CalendarDialog dialog = CalendarDialog.newInstance(id);
+                    Log.d("return", DisciplineStorage.get(getActivity()).getDisciple(id).getDiscipleName());
                     dialog.setTargetFragment(SheduleListFragment.this, REQUEST_DATE);
                     dialog.show(manager, DIALOG_DATE);
                 }
