@@ -53,6 +53,7 @@ public class CalendarDialog extends DialogFragment {
         List<Discipline> disciplineList = DisciplineStorage.get(getActivity()).getDisciplines();
         Calendar currentCal = Calendar.getInstance();
         Collections.sort(disciplineList, Discipline.dateComparator);
+        Log.d("TES", disciplineList.get(0).getDate().toString());
         Log.d("TES", disciplineList.get(DisciplineStorage.get(getActivity()).getDisciplines().size() - 1).getDate().toString());
         //mDatePicker.setMaxDate(disciplineList.get(DisciplineStorage.get(getActivity()).getDisciplines().size() - 1).getDate().getTime());
         //Calendar minDate = Calendar.getInstance();
@@ -108,7 +109,7 @@ public class CalendarDialog extends DialogFragment {
         DatePickerDialog tpd = new DatePickerDialog(getActivity(), listener, currentCal.get(Calendar.YEAR), currentCal.get(Calendar.MONTH), currentCal.get(Calendar.DAY_OF_MONTH));
         tpd.getDatePicker().setMaxDate(disciplineList.get(DisciplineStorage.get(getActivity()).getDisciplines().size() - 1).getDate().getTime());
         Calendar minDate = Calendar.getInstance();
-        minDate.setTime(disciplineList.get(1).getDate());
+        minDate.setTime(disciplineList.get(0).getDate());
         tpd.getDatePicker().setMinDate(minDate.getTimeInMillis());
         return tpd;
     }

@@ -297,6 +297,14 @@ public class SheduleListFragment extends Fragment {
             String exclusePart = "";
             String week = "";
             String date = "";
+
+            if(disciplineType.equals("Экзамен") || disciplineType.equals("Консультация")) {
+                Log.d("scheduleReader", "Skip as workaround: " + disciplineTitle + " " + disciplineType);
+                rowIndex += 2;
+                onceDiscipline = false;
+                continue;
+            }
+
             if (sheet != 0) {
                 if (sheet != langGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
                     Log.d("SLF", "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(sheet - 1));
@@ -501,6 +509,8 @@ public class SheduleListFragment extends Fragment {
             Log.d("TEST", Integer.toString(cal.get(Calendar.DAY_OF_WEEK)));
             int diffCount = 0;
             boolean firstMonth = true;
+
+
 
             int countDates = 1;
             if (onceCalendars.size() != 0)
