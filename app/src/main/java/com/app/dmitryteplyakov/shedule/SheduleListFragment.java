@@ -1106,7 +1106,8 @@ public class SheduleListFragment extends Fragment {
         if (mRecyclerView.getAdapter() == null || mAdapter == null) {
             mAdapter = new SheduleAdapter(disciplines); // Связывание списка данных с адаптером
             //mAdapter.setHasStableIds(true);
-            mRecyclerView.setAdapter(mAdapter); // Назначение адаптера к RecyclerView
+            if(isAdded())
+                mRecyclerView.setAdapter(mAdapter); // Назначение адаптера к RecyclerView
         } else {
             mAdapter.setDisciplines(disciplines);
             mAdapter.notifyDataSetChanged();
