@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v14.preference.SwitchPreference;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -29,6 +30,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.app.dmitryteplyakov.shedule.Core.Discipline;
 import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
+import com.app.dmitryteplyakov.shedule.Core.TableParser;
+
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -79,13 +82,15 @@ public class SheduleListFragment extends Fragment {
     private boolean isSubgroup;
     private boolean isDbDrop;
     private boolean turnOff;
-    private boolean inProcess;
+    private volatile boolean inProcess;
     private static boolean isCourseChanged;
     private static final int REQUEST_DATE = 5;
     private static final String DIALOG_DATE = "com.app.shedulelistfragment.dialog_date";
     private static boolean isNotGlobalChanges;
     private static boolean resetPosition;
     private DividerItemDecoration mDividerItemDecorator;
+    private AsyncLoader loader;
+    private AsyncUpdater updater;
 
     public static void setResetPosition(boolean resetPositionArg) {
         resetPosition = resetPositionArg;
@@ -252,7 +257,7 @@ public class SheduleListFragment extends Fragment {
             loader.execute(getActivity());
         }
     }
-
+    /* Old imp
     private void sheduleReader(boolean isNew, int sheet, int labGroup, int langGroup) {
         if (!isNew) {
             Log.d("SHDRDR", "Data is fresh. Skip updating...");
@@ -680,6 +685,7 @@ public class SheduleListFragment extends Fragment {
             Log.d("SLF", "JUMP: OLD: " + Integer.toString(rowIndex - 3) + " NEW: " + Integer.toString(rowIndex));
         }
     }
+    */
 
 
     @Override
@@ -730,7 +736,7 @@ public class SheduleListFragment extends Fragment {
                     labGroup = 2;
                 else
                     labGroup = 3;
-                sheduleReader(dSuccess, sheet, labGroup, langGroup);
+                new TableParser(dSuccess, sheet, labGroup, langGroup, filename, mContext);
             }
         });
 
@@ -920,6 +926,7 @@ public class SheduleListFragment extends Fragment {
                 });
             }
         });
+        //updateUI(getActivity());
 
         return v;
     }
