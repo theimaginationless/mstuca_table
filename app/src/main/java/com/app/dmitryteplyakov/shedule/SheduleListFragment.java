@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -130,6 +131,7 @@ public class SheduleListFragment extends Fragment {
         String stream = sharedPreferences.getString("stream", "0");
         String file_url = null;
         String fix = getString(R.string.m);
+        String specsymb = "-";
         //Log.d("PARSERHTML", pageParser());
 
         Log.d("sheduleDownloader", "SHEET: " + Integer.toString(sheet));
@@ -146,8 +148,13 @@ public class SheduleListFragment extends Fragment {
         Log.d("ERERRE", spec);
         String urlPart = null;
         try {
-            if(!faculty.equals(getString(R.string.mech_link)) && !spec.equals(getString(R.string.rst)) && !spec.equals(getString(R.string.uvdbobp)))
-                urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
+            if(!faculty.equals(getString(R.string.mech_link)) && !spec.equals(getString(R.string.rst)) && !spec.equals(getString(R.string.uvdbobp))) {
+                if(spec.equals(getString(R.string.app_math_val)) && course.equals("1")) {
+                    stream = "";
+                    specsymb = "";
+                }
+                urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + specsymb + stream + ".xls";
+            }
             else if(faculty.equals(getString(R.string.mech_link)))
                 urlPart = faculty + "/" + fix + "/" + spec + " " + course + "-" + stream + ".xls";
             else if(spec.equals(getString(R.string.rst)))
@@ -257,7 +264,11 @@ public class SheduleListFragment extends Fragment {
             loader.execute(getActivity());
         }
     }
-    /* Old imp
+
+    /**
+     * Old parser method. Replaced by TableParser.
+     */
+    /*
     private void sheduleReader(boolean isNew, int sheet, int labGroup, int langGroup) {
         if (!isNew) {
             Log.d("SHDRDR", "Data is fresh. Skip updating...");
@@ -700,8 +711,8 @@ public class SheduleListFragment extends Fragment {
 
     }
 
-    public boolean isOnline() {
-        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+    public boolean isOnline(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
@@ -736,7 +747,8 @@ public class SheduleListFragment extends Fragment {
                     labGroup = 2;
                 else
                     labGroup = 3;
-                new TableParser(dSuccess, sheet, labGroup, langGroup, filename, mContext);
+                //sheduleReader(dSuccess, sheet, labGroup, langGroup);
+                new TableParser(dSuccess, sheet, labGroup, langGroup, filename, mContext).parse();
             }
         });
 
@@ -764,13 +776,13 @@ public class SheduleListFragment extends Fragment {
     private void checkStarter(Context mContext, int sheet) {
         Thread thread = null;
 
-        if (isOnline() || isNotGlobalChanges) {
+        if (isOnline(mContext) || isNotGlobalChanges) {
             workingOn(mContext, sheet);
         } else {
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
             turnOff = true;
         }
-        Log.d("SLF", "Connection state: " + Boolean.toString(isOnline()));
+        Log.d("SLF", "Connection state: " + Boolean.toString(isOnline(mContext)));
     }
 
     private class AsyncUpdater extends AsyncTask<Context, Void, Void> {
@@ -1007,12 +1019,27 @@ public class SheduleListFragment extends Fragment {
             SimpleDateFormat dateFormatter = new SimpleDateFormat("dd MMM");
             SimpleDateFormat dateTitleFormatter = new SimpleDateFormat("EEEE, dd MMMM yyyy");
             SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
-            String headerTitle = dateTitleFormatter.format(mDiscipline.getDate());
-            headerTitle = headerTitle.substring(0, 1).toUpperCase() + headerTitle.substring(1);
-            mDate.setText(dateFormatter.format(discipline.getDate()));
+            String dayTitle = dateTitleFormatter.format(mDiscipline.getDate());
+            dayTitle = dayTitle.substring(0, 1).toUpperCase() + dayTitle.substring(1);
             mDurationTime.setText(timeFormatter.format(mDiscipline.getDate()) + " - " + timeFormatter.format(new Date(mDiscipline.getEndTime())));
-            mGlobalDate.setText(headerTitle);
+
             mPairNumber.setText(Integer.toString(mDiscipline.getNumber()));
+            mDate.setText(dateFormatter.format(discipline.getDate()));
+            Calendar calCur = Calendar.getInstance();
+            calCur.setTime(new Date());
+            Calendar calDay = Calendar.getInstance();
+            calDay.setTime(discipline.getDate());
+            boolean monthEq = calCur.get(Calendar.MONTH) == calDay.get(Calendar.MONTH);
+            boolean dayEq = calCur.get(Calendar.DAY_OF_MONTH) == calDay.get(Calendar.DAY_OF_MONTH);
+            String headerTitle = null;
+            if(monthEq && dayEq) {
+                headerTitle = dayTitle + " " + getString(R.string.today_label);
+                mGlobalDate.setTypeface(mGlobalDate.getTypeface(), Typeface.BOLD);
+            } else {
+                headerTitle = dayTitle;
+                mGlobalDate.setTypeface(Typeface.DEFAULT);
+            }
+            mGlobalDate.setText(headerTitle);
 
         }
 

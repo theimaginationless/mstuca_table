@@ -24,8 +24,23 @@ import java.util.TimeZone;
 public class TableParser {
     private boolean onceDiscipline;
     private static final String TAG = "TableParser";
+    private Context mContext;
+    private int mSheet;
+    private int mLabGroup;
+    private int mLangGroup;
+    private String mFileName;
+    private boolean mIsNew;
     public TableParser(boolean isNew, int sheet, int labGroup, int langGroup, String filename, Context context) {
-        if (!isNew) {
+        mIsNew = isNew;
+        mSheet = sheet;
+        mLabGroup = labGroup;
+        mLangGroup = langGroup;
+        mFileName = filename;
+        mContext = context.getApplicationContext();
+    }
+    public void parse() {
+
+        if (!mIsNew) {
             Log.d(TAG, "Data is fresh. Skip updating...");
             return;
         }
@@ -38,19 +53,19 @@ public class TableParser {
         year.setTime(new Date());
         HSSFWorkbook myShedule = null;
         try {
-            myShedule = new HSSFWorkbook(((context.openFileInput(filename))));
+            myShedule = new HSSFWorkbook(((mContext.openFileInput(mFileName))));
         } catch (IOException e) {
-            Log.e(TAG, "Error read schedule file! File: " + filename);
+            Log.e(TAG, "Error read schedule file! File: " + mFileName);
         }
         try {
-            if (myShedule.getNumberOfSheets() < sheet + 1) {
+            if (myShedule.getNumberOfSheets() < mSheet + 1) {
                 Log.d(TAG, "Done.");
                 return;
             }
         } catch(NullPointerException e) {
-            Log.e(TAG, "NPE (monitoring need): " + "sheetNumber: " + Integer.toString(sheet + 1) + " isNew: " + Boolean.toString(isNew) + " Lab/Lang group: " + Integer.toString(labGroup) + "/" + Integer.toString(langGroup), e);
+            Log.e(TAG, "NPE (monitoring need): " + "sheetNumber: " + Integer.toString(mSheet + 1) + " mIsNew: " + Boolean.toString(mIsNew) + " Lab/Lang group: " + Integer.toString(mLabGroup) + "/" + Integer.toString(mLangGroup), e);
         }
-        HSSFSheet mySheduleSheet = myShedule.getSheetAt(sheet);
+        HSSFSheet mySheduleSheet = myShedule.getSheetAt(mSheet);
 
         List<CellRangeAddress> regions = mySheduleSheet.getMergedRegions();
 
@@ -70,24 +85,26 @@ public class TableParser {
             String exclusePart = "";
             String week = "";
             String date = "";
-
-            if(disciplineType.equals("Экзамен") || disciplineType.equals("Консультация")) {
+            /**
+             * Ohh, it's a workaround...
+             */
+            if(disciplineType.equals("Экзамен") || disciplineType.equals("Консультация") || disciplineType.equals("Зачет(диф.зач.)") || (disciplineTitle.equals("Иностранный язык") && (mSheet == 0))) {
                 Log.d(TAG, "Skip as workaround: " + disciplineTitle + " " + disciplineType);
                 rowIndex += 2;
                 onceDiscipline = false;
                 continue;
             }
 
-            if (sheet != 0) {
-                if (sheet != langGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
-                    Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(sheet - 1));
+            if (mSheet != 0) {
+                if (mSheet != mLangGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
+                    Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(mSheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
                     Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex - 1));
                     continue;
                 }
-                if (sheet != labGroup && disciplineType.contains("Лаб.раб.")) {
-                    Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(sheet - 1));
+                if (mSheet != mLabGroup && disciplineType.contains("Лаб.раб.")) {
+                    Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(mSheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
                     Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex + 1));
@@ -428,15 +445,18 @@ public class TableParser {
                                 tempDiscipline.setAuditoryNumber(aud);
                                 tempDiscipline.setDiscipleName(disciplineTitle);
                                 tempDiscipline.setTeacherName(teacherName);
-                                if (sheet != 0) {
+                                /**
+                                 * Deprecated code (replace by first-time break.
+                                 */
+                                /*if (mSheet != 0) {
                                     Log.d(TAG, "SUBGROUP: " + tempDiscipline.getDiscipleName() + " DATE: " + tempDiscipline.getDate().toString());
-                                    if (DisciplineStorage.get(context).getDiscipleByDate(tempDiscipline.getDate()) != null) {
-                                        DisciplineStorage.get(context).deleteDisciplineByDate(tempDiscipline.getDate());
+                                    if (DisciplineStorage.get(mContext).getDiscipleByDate(tempDiscipline.getDate()) != null) {
+                                        DisciplineStorage.get(mContext).deleteDisciplineByDate(tempDiscipline.getDate());
                                         Log.d(TAG, "DELETE OLD");
                                     }
-                                }
-                                DisciplineStorage.get(context).addDisciple(tempDiscipline);
-                                Log.d(TAG, "SHEET: " + Integer.toString(sheet) + " TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
+                                }*/
+                                DisciplineStorage.get(mContext).addDisciple(tempDiscipline);
+                                Log.d(TAG, "SHEET: " + Integer.toString(mSheet) + " TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
 
                             } else
                                 continue;
