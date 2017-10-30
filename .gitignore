@@ -3,4 +3,5 @@ build/
 .idea/
 local.properties
 .git/
+*.apk
 
