@@ -5,7 +5,7 @@
     <string name="error_connection">Проверьте соединение с интернетом</string>
     <string name="data_already_fresh">Обновление не требуется</string>
     <string name="pair_counter_text">Пара</string>
-    <string name="data_updated">Данные обновлены</string>
+    <string name="data_updated">Новое расписание загружено! Разбираем.</string>
     <string name="subgroup_eng">Подгруппа по ин. Яз</string>
     <string name="subgroup_lab">Подгруппа по лабораторным работам</string>
     <string name="today_label">(Сегодня)</string>

@@ -7,13 +7,13 @@ android {
         }
     }
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId 'com.app.dmitryteplyakov.schedulenew'
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 12
-        versionName '2.0'
+        versionCode 14
+        versionName '2.2'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 

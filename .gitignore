@@ -1,7 +1,9 @@
-build/
+/build/
+/app/build
 *.iml
 .idea/
 local.properties
 .git/
 *.apk
-
+/.gradle
+/app/release

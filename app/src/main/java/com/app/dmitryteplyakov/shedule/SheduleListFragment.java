@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v14.preference.SwitchPreference;
 import android.support.v4.app.Fragment;
@@ -43,6 +44,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -92,6 +94,7 @@ public class SheduleListFragment extends Fragment {
     private DividerItemDecoration mDividerItemDecorator;
     private AsyncLoader loader;
     private AsyncUpdater updater;
+    private Handler mHandler;
 
     public static void setResetPosition(boolean resetPositionArg) {
         resetPosition = resetPositionArg;
@@ -106,6 +109,10 @@ public class SheduleListFragment extends Fragment {
     }
 
     public void dbDropped() {
+        isDbDrop = true;
+    }
+    public void dropDb() {
+        DisciplineStorage.get(getActivity()).resetDb();
         isDbDrop = true;
     }
 
@@ -123,7 +130,7 @@ public class SheduleListFragment extends Fragment {
     }*/
 
 
-    private boolean downloadFile(Context mContext, int sheet) {
+    private boolean downloadFile(Context mContext, int sheet, boolean first) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         String faculty = sharedPreferences.getString("faculty", "0");
         String spec = sharedPreferences.getString("spec", "0");
@@ -204,7 +211,7 @@ public class SheduleListFragment extends Fragment {
                     Date lastModLocal = new Date(localFile.lastModified());
                     Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
                     if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
-                        if (swipeRefresh)
+                        if (swipeRefresh && first)
                             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
                         Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
                         turnOff = true;
@@ -214,7 +221,8 @@ public class SheduleListFragment extends Fragment {
             }
 
             forcedUpdate = false;
-
+            dropDb();
+            swipeRefresh = true;
 
 
 
@@ -226,8 +234,10 @@ public class SheduleListFragment extends Fragment {
             output.flush();
 
 
-            if (swipeRefresh)
+            if (swipeRefresh && first) {
                 Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_updated), Snackbar.LENGTH_SHORT).show();
+            }
+            swipeRefresh = false;
             return true;
 
         } catch (UnknownHostException e) {
@@ -235,7 +245,8 @@ public class SheduleListFragment extends Fragment {
             turnOff = true;
             return false;
         } catch(FileNotFoundException e) {
-            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.filenotfound_snackbar), Snackbar.LENGTH_LONG).show();
+            if(first)
+                Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.filenotfound_snackbar), Snackbar.LENGTH_LONG).show();
             turnOff = true;
             return false;
         } catch(IOException e) {
@@ -257,9 +268,10 @@ public class SheduleListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (DisciplineStorage.get(getActivity()).getDisciplines().size() == 0 && notFirstRun) {
+        if (DisciplineStorage.get(getActivity()).getDisciplines().size() == 0 && isCourseChanged) {
             Log.d("SLF", "Rebase after DB RESET");
-            isDbDrop = true;
+            //isDbDrop = true;
+            dropDb();
             AsyncLoader loader = new AsyncLoader(0);
             loader.execute(getActivity());
         }
@@ -717,7 +729,7 @@ public class SheduleListFragment extends Fragment {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    private void workingOn(final Context mContext, final int sheet) {
+    private void workingOn(final Context mContext, final int sheet, final boolean first) {
         dSuccess = false;
         Log.d("workingOn", Integer.toString(sheet));
         Thread thread = new Thread(new Runnable() {
@@ -728,7 +740,7 @@ public class SheduleListFragment extends Fragment {
                     return;
                 }
                 Log.d("DownloadTask", "Download started!");
-                dSuccess = downloadFile(mContext, sheet);
+                dSuccess = downloadFile(mContext, sheet, first);
             }
         });
         Thread readThread = new Thread(new Runnable() {
@@ -773,13 +785,14 @@ public class SheduleListFragment extends Fragment {
         swipeRefresh = false;
     }
 
-    private void checkStarter(Context mContext, int sheet) {
+    private void checkStarter(Context mContext, int sheet, boolean first) {
         Thread thread = null;
 
         if (isOnline(mContext) || isNotGlobalChanges) {
-            workingOn(mContext, sheet);
+            workingOn(mContext, sheet, first);
         } else {
-            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
+            if(first)
+                Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.error_connection), Snackbar.LENGTH_LONG).show();
             turnOff = true;
         }
         Log.d("SLF", "Connection state: " + Boolean.toString(isOnline(mContext)));
@@ -795,8 +808,8 @@ public class SheduleListFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Context... contexts) {
-            for (Context context : contexts)
-                localContext = context;
+            //for (Context context : contexts)
+            localContext = contexts[0];
             return null;
         }
 
@@ -840,12 +853,12 @@ public class SheduleListFragment extends Fragment {
             if(DisciplineStorage.get(localContext).getDisciplines().size() == 0)
                 forcedUpdate = true;
             Log.d("AsyncLoader", "Forced update: " + Boolean.toString(forcedUpdate));
-            checkStarter(localContext, 0);
+            checkStarter(localContext, 0, true);
             if(turnOff)
                 return null;
             setIsNotGlobalChanges(true);
-            checkStarter(localContext, 2);
-            checkStarter(localContext, 3);
+            checkStarter(localContext, 2, false);
+            checkStarter(localContext, 3, false);
             //}
             return null;
         }
@@ -885,6 +898,7 @@ public class SheduleListFragment extends Fragment {
         setHasOptionsMenu(true);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.shedule_list_recycler_view);
         mSwipeRefreshData = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshData.setColorSchemeResources(R.color.colorPrimary);
         smoothScroller = new LinearSmoothScroller(getActivity()) {
             @Override
             protected int getVerticalSnapPreference() {
@@ -907,20 +921,35 @@ public class SheduleListFragment extends Fragment {
         mRecyclerView.addItemDecoration(mDividerItemDecorator);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
+        //AsyncUpdater updater = new AsyncUpdater();
+        //updater.execute(getActivity());
+        //mSwipeRefreshData.setEnabled(true);
+        updateUI(getActivity());
+        //mSwipeRefreshData.setEnabled(false);
         //if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
-        if (!notFirstRun && sharedPreferences.getBoolean("check_update_when_start", true)) {
-            Log.d("SLF", "First check updates start");
-            AsyncLoader loader = new AsyncLoader(0);
-            loader.execute(getActivity());
-        } else if (DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
-            isDbDrop = true;
+        if(sharedPreferences.getBoolean("check_update_when_start", true)) {
             AsyncLoader loader = new AsyncLoader(0);
             loader.execute(getActivity());
         } else {
             AsyncUpdater updater = new AsyncUpdater();
             updater.execute(getActivity());
         }
+        /*if (!notFirstRun && sharedPreferences.getBoolean("check_update_when_start", true)) {
+            Log.d("SLF", "First check updates start");
+            AsyncLoader loader = new AsyncLoader(0);
+            loader.execute(getActivity());
+        } else if (DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
+            //isDbDrop = true;
+            dropDb();
+            AsyncLoader loader = new AsyncLoader(0);
+            loader.execute(getActivity());
+        } else {
+            AsyncUpdater updater = new AsyncUpdater();
+            //updater = new AsyncUpdater();
+            updater.execute(getActivity());
+            //AsyncLoader loader = new AsyncLoader(0);
+            //loader.execute(getActivity());
+        } */
 
 
         getActivity().findViewById(R.id.toolbar).setOnClickListener(new View.OnClickListener() {
