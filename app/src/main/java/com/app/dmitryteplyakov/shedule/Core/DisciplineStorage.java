@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.app.dmitryteplyakov.shedule.database.DisciplineBaseHelper;
 import com.app.dmitryteplyakov.shedule.database.DisciplineCursorWrapper;
+import com.app.dmitryteplyakov.shedule.database.DisciplineDbSchema;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,6 +59,31 @@ public class DisciplineStorage {
         return new DisciplineCursorWrapper(cursor);
     }
 
+    private DisciplineCursorWrapper queryDiscipline() {
+        Cursor cursor = mDatabase.query(
+                DisciplineTable.NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                DisciplineTable.Cols.DATE + " ASC"
+        );
+        return new DisciplineCursorWrapper(cursor);
+    }
+
+    public Discipline getFirstLection() {
+        DisciplineCursorWrapper cursor = queryDiscipline();
+        Discipline firstDiscipline = null;
+        try {
+            cursor.moveToFirst();
+            firstDiscipline = cursor.getDiscipline();
+        } finally {
+            cursor.close();
+        }
+        return firstDiscipline;
+    }
+
     public List<Discipline> getDisciplines() {
         List<Discipline> disciplines = new ArrayList<>();
         DisciplineCursorWrapper cursor = queryDiscipline(null, null);
@@ -80,12 +106,18 @@ public class DisciplineStorage {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+        Discipline firstDiscipline = getFirstLection();
+        Calendar firstLection = Calendar.getInstance();
+        firstLection.setTime(firstDiscipline.getDate());
         long endDate = calendar.getTime().getTime();
 
         if(startD != null)
             calendar.setTime(startD);
         else {
-            calendar.set(Calendar.MONTH, 8);
+            //calendar.set(Calendar.MONTH, 8);
+            calendar.set(Calendar.MONTH, firstLection.get(Calendar.MONTH));
+            Log.d("FIRST LECTION", String.valueOf(firstLection.get(Calendar.MONTH)));
+
             calendar.set(Calendar.DAY_OF_MONTH, 1);
         }
         calendar.set(Calendar.HOUR_OF_DAY, 0);

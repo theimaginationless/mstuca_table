@@ -118,6 +118,7 @@ public class CalendarDialog extends DialogFragment {
         if(resultCode == Activity.RESULT_OK) {
             Intent date = new Intent();
             date.putExtra(RETURN_DATE, time);
+            Log.d("MLSCAL", String.valueOf(time.getTime()));
             getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, date);
         }
     }

@@ -399,8 +399,8 @@ public class TableParser {
                         if (startWeek == endWeek) {
                             Log.d(TAG, "COMPARED! WORKING!");
 
-                            Log.d(TAG, Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) + " DISCIPLINE CAL: " + Integer.toString(weekInt));
-                            if ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2 == weekInt || weekInt == 2) {
+                            Log.d(TAG, Integer.toString(Math.abs(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1)) + " DISCIPLINE CAL: " + Integer.toString(weekInt));
+                            if ((Math.abs(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1)) % 2 == weekInt || weekInt == 2) {
                                 Log.d(TAG, "TITLE: " + disciplineTitle + " DAY: " + Integer.toString(DAY) + " MONTH: " + Integer.toString(MONTH + 1) + " NUM: " + Integer.toString(number) + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) + " CURRENT DAY: " + Integer.toString(DAY));
                                 Discipline tempDiscipline = new Discipline();
                                 tempDiscipline.setNumber(number);
