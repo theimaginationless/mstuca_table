@@ -3,6 +3,7 @@ package com.app.dmitryteplyakov.shedule.Core;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -27,6 +28,7 @@ public class DisciplineStorage {
     private static DisciplineStorage sDisciplineStorage;
     private Context mContext;
     private SQLiteDatabase mDatabase;
+    private static final String TAG = "DisciplineStorage";
 
     public static DisciplineStorage get(Context context) {
         if(sDisciplineStorage == null)    sDisciplineStorage = new DisciplineStorage(context);
@@ -78,6 +80,9 @@ public class DisciplineStorage {
         try {
             cursor.moveToFirst();
             firstDiscipline = cursor.getDiscipline();
+        } catch (CursorIndexOutOfBoundsException ex) {
+            Log.e(TAG, "CursorIndexOutOfBoundsException. Cursor.getCount: " + cursor.getCount() + " Cursor.Position: " + cursor.getPosition()
+            + " cursor.isFirst: " + cursor.isFirst() + " cursorisNull: " + cursor.isNull(cursor.getPosition()) + " cursor.isAfterLast: " + cursor.isAfterLast());
         } finally {
             cursor.close();
         }
