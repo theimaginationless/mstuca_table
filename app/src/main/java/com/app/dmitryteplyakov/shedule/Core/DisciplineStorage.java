@@ -69,7 +69,7 @@ public class DisciplineStorage {
                 null,
                 null,
                 null,
-                DisciplineTable.Cols.DATE + " ASC"
+                DisciplineTable.Cols.DATE + " ASC LIMIT 1"
         );
         return new DisciplineCursorWrapper(cursor);
     }
@@ -80,9 +80,6 @@ public class DisciplineStorage {
         try {
             cursor.moveToFirst();
             firstDiscipline = cursor.getDiscipline();
-        } catch (CursorIndexOutOfBoundsException ex) {
-            Log.e(TAG, "CursorIndexOutOfBoundsException. Cursor.getCount: " + cursor.getCount() + " Cursor.Position: " + cursor.getPosition()
-            + " cursor.isFirst: " + cursor.isFirst() + " cursorisNull: " + cursor.isNull(cursor.getPosition()) + " cursor.isAfterLast: " + cursor.isAfterLast());
         } finally {
             cursor.close();
         }
