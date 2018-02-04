@@ -110,6 +110,9 @@ public class DisciplineStorage {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         Discipline firstDiscipline = getFirstLection();
+        if(firstDiscipline == null) {
+            return 0;
+        }
         Calendar firstLection = Calendar.getInstance();
         firstLection.setTime(firstDiscipline.getDate());
         long endDate = calendar.getTime().getTime();
