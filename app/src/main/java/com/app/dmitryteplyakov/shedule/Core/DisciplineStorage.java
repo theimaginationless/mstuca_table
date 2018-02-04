@@ -78,8 +78,9 @@ public class DisciplineStorage {
         DisciplineCursorWrapper cursor = queryDiscipline();
         Discipline firstDiscipline = null;
         try {
-            cursor.moveToFirst();
-            firstDiscipline = cursor.getDiscipline();
+            if(cursor.moveToFirst()) {
+                firstDiscipline = cursor.getDiscipline();
+            }
         } finally {
             cursor.close();
         }
