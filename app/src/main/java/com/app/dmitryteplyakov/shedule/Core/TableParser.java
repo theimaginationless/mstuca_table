@@ -1,6 +1,8 @@
 package com.app.dmitryteplyakov.shedule.Core;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -37,6 +39,7 @@ public class TableParser {
         mLangGroup = langGroup;
         mFileName = filename;
         mContext = context.getApplicationContext();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
     }
     public void parse() {
 
@@ -96,6 +99,9 @@ public class TableParser {
             }
 
             if (mSheet != 0) {
+                if(disciplineTitle.contains("Иностранный")) {
+                    disciplineType = "Пр.Зан.";
+                }
                 if (mSheet != mLangGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
                     Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(mSheet - 1));
                     rowIndex += 2;

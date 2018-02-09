@@ -156,10 +156,11 @@ public class SheduleListFragment extends Fragment {
         String urlPart = null;
         try {
             if(!faculty.equals(getString(R.string.mech_link)) && !spec.equals(getString(R.string.rst)) && !spec.equals(getString(R.string.uvdbobp))) {
-                if(spec.equals(getString(R.string.app_math_val)) && course.equals("1")) {
+                // Shitburger from MSTUCA
+                /*if(spec.equals(getString(R.string.app_math_val)) && course.equals("1")) {
                     stream = "";
                     specsymb = "";
-                }
+                }*/
                 urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + specsymb + stream + ".xls";
             }
             else if(faculty.equals(getString(R.string.mech_link)))
@@ -268,13 +269,18 @@ public class SheduleListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (DisciplineStorage.get(getActivity()).getDisciplines().size() == 0 && isCourseChanged) {
+        if (DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
+            int sheet = 0;
             Log.d("SLF", "Rebase after DB RESET");
             //isDbDrop = true;
             dropDb();
             AsyncLoader loader = new AsyncLoader(0);
             loader.execute(getActivity());
-        }
+            Log.d("ONRESUME", "GLOBAL! " + Boolean.toString(isCourseChanged));
+        }/* else if(DisciplineStorage.get(getActivity()).getDisciplines().size() == 0) {
+            Log.d("ONRESUME", "NO GLOBAL");
+
+        }*/
     }
 
     /**
@@ -850,7 +856,7 @@ public class SheduleListFragment extends Fragment {
             //    forcedUpdate = true;
             //    Log.d("Thread CHECKSTARTER", "SHEET INDEX: " + Integer.toString(i));
             //    checkStarter(localContext, i);
-            if(DisciplineStorage.get(localContext).getDisciplines().size() == 0)
+            if(DisciplineStorage.get(localContext).getDisciplines().size() == 0 && isCourseChanged)
                 forcedUpdate = true;
             Log.d("AsyncLoader", "Forced update: " + Boolean.toString(forcedUpdate));
             checkStarter(localContext, 0, true);
