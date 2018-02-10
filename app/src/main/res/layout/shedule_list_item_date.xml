@@ -17,10 +17,10 @@
         android:layout_height="wrap_content"/>
 
 <FrameLayout
-                                    android:foreground="?attr/selectableItemBackground"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    xmlns:tools="http://schemas.android.com/tools">
+    android:foreground="?attr/selectableItemBackground"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

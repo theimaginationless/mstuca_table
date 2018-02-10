@@ -5,7 +5,7 @@
     <string name="error_connection">Проверьте соединение с интернетом</string>
     <string name="data_already_fresh">Обновление не требуется</string>
     <string name="pair_counter_text">Пара</string>
-    <string name="data_updated">Новое расписание загружено! Разбираем.</string>
+    <string name="data_updated">Обновление</string>
     <string name="subgroup_eng">Подгруппа по ин. Яз</string>
     <string name="subgroup_lab">Подгруппа по лабораторным работам</string>
     <string name="today_label">(Сегодня)</string>
@@ -108,7 +108,7 @@
         <item>@string/rs</item>
     </array>
 
-    <string name="filenotfound_snackbar">Ошибка. Проверьте правильность настроек.</string>
+    <string name="filenotfound_snackbar">Проверьте правильность настроек</string>
 
     <array name="fuvt_list">
         <item>@string/op</item>
