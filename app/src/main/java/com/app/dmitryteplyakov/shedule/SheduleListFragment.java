@@ -1,6 +1,8 @@
 package com.app.dmitryteplyakov.shedule;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,6 +32,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.app.dmitryteplyakov.shedule.Core.Discipline;
 import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
 import com.app.dmitryteplyakov.shedule.Core.TableParser;
@@ -96,6 +100,7 @@ public class SheduleListFragment extends Fragment {
     private AsyncUpdater updater;
     private Handler mHandler;
     private static boolean needUpdateAfterSettings;
+    private ClipboardManager mClipboardManager;
 
     public static void setNeedUpdate(boolean need) {
         needUpdateAfterSettings = need;
@@ -498,6 +503,8 @@ public class SheduleListFragment extends Fragment {
         mDividerItemDecorator = new DividerItemDecoration(mRecyclerView.getContext(), linearLayoutManager.getOrientation());
         mRecyclerView.addItemDecoration(mDividerItemDecorator);
 
+        mClipboardManager = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         updateUI(getActivity());
         if(sharedPreferences.getBoolean("check_update_when_start", true)) {
@@ -530,7 +537,7 @@ public class SheduleListFragment extends Fragment {
     }
 
     // Реализация адаптера
-    private class SheduleHolder extends RecyclerView.ViewHolder implements View.OnClickListener { // Реализация Holder. Также реализует интерфейс OnClickListener ля обработки нажатий на View
+    private class SheduleHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener { // Реализация Holder. Также реализует интерфейс OnClickListener ля обработки нажатий на View
         public TextView mTeacherNameTextView; // Объекты макета list_item
         public TextView mDiscipleNameTextView;
         public TextView mAuditoryTextView;
@@ -543,6 +550,7 @@ public class SheduleListFragment extends Fragment {
         public SheduleHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
             mTeacherNameTextView = (TextView) itemView.findViewById(R.id.teacherName); // Связывание объектов макета list_item с переменными
             mDiscipleNameTextView = (TextView) itemView.findViewById(R.id.disciple_name);
             mAuditoryTextView = (TextView) itemView.findViewById(R.id.auditory);
@@ -570,9 +578,18 @@ public class SheduleListFragment extends Fragment {
         public void onClick(View v) {
             //
         }
+
+        @Override
+        public boolean onLongClick(View view) {
+            String clipboardContent = mDiscipline.getDiscipleName() + " " + mDiscipline.getNumber() + getString(R.string.pair_clipboard) + " " + mDiscipline.getAuditoryNumber();
+            ClipData mClipData = ClipData.newPlainText(getString(R.string.app_name), clipboardContent);
+            mClipboardManager.setPrimaryClip(mClipData);
+            Toast.makeText(getActivity(), getString(R.string.toast_pair_clipboard), Toast.LENGTH_SHORT).show();
+            return true;
+        }
     }
 
-    private class SheduleHolderDate extends RecyclerView.ViewHolder implements View.OnClickListener { // Реализация Holder. Также реализует интерфейс OnClickListener ля обработки нажатий на View
+    private class SheduleHolderDate extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener { // Реализация Holder. Также реализует интерфейс OnClickListener ля обработки нажатий на View
         public TextView mTeacherNameTextView; // Объекты макета list_item
         public TextView mDiscipleNameTextView;
         public TextView mAuditoryTextView;
@@ -586,6 +603,7 @@ public class SheduleListFragment extends Fragment {
         public SheduleHolderDate(View itemView) {
             super(itemView);
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
             mTeacherNameTextView = (TextView) itemView.findViewById(R.id.teacherName); // Связывание объектов макета list_item с переменными
             mDiscipleNameTextView = (TextView) itemView.findViewById(R.id.disciple_name);
             mAuditoryTextView = (TextView) itemView.findViewById(R.id.auditory);
@@ -632,6 +650,15 @@ public class SheduleListFragment extends Fragment {
         @Override
         public void onClick(View v) {
             //
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            String clipboardContent = mDiscipline.getDiscipleName() + " " + mDiscipline.getNumber() + getString(R.string.pair_clipboard) + " " + mDiscipline.getAuditoryNumber();
+            ClipData mClipData = ClipData.newPlainText(getString(R.string.app_name), clipboardContent);
+            mClipboardManager.setPrimaryClip(mClipData);
+            Toast.makeText(getActivity(), getString(R.string.toast_pair_clipboard), Toast.LENGTH_SHORT).show();
+            return true;
         }
     }
 
