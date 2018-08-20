@@ -157,6 +157,6 @@
     <string name="update_toolbar">Обновить</string>
     <string name="check_update_when_start">Проверять обновление расписания при запуске</string>
     <string name="open_calendar_toolbar">Открыть календарь</string>
-    <string name="pair_clipboard">-ой парой, </string>
+    <string name="pair_clipboard">-я пара</string>
     <string name="toast_pair_clipboard">Дисциплина скопирована</string>
 </resources>
