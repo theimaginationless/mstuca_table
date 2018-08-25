@@ -22,7 +22,7 @@
         android:entries="@array/courses"
         android:entryValues="@array/courses"/>
     <ListPreference
-        android:title="@string/subgroup_eng"
+        android:title="@string/subgroup_lang"
         android:key="subgroup_lang"
         android:defaultValue="@string/first"
         android:enabled="false"

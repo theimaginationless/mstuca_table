@@ -68,6 +68,10 @@ public class TableParser {
         } catch(NullPointerException e) {
             Log.e(TAG, "NPE (monitoring need): " + "sheetNumber: " + Integer.toString(mSheet + 1) + " mIsNew: " + Boolean.toString(mIsNew) + " Lab/Lang group: " + Integer.toString(mLabGroup) + "/" + Integer.toString(mLangGroup), e);
         }
+        if(myShedule == null) {
+            Log.e(TAG, "Sheet not found: fname: " + mFileName + "; Sheet num: " + mSheet);
+            return;
+        }
         HSSFSheet mySheduleSheet = myShedule.getSheetAt(mSheet);
 
         List<CellRangeAddress> regions = mySheduleSheet.getMergedRegions();

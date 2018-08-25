@@ -12,8 +12,8 @@ android {
         applicationId 'com.app.dmitryteplyakov.schedulenew'
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 26
-        versionName '2.5.0'
+        versionCode 27
+        versionName '2.5.1'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
