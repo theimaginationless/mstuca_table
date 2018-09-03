@@ -99,6 +99,7 @@
         <item>@string/akb</item>
         <item>@string/akmag</item>
         <item>@string/rst</item>
+        <item>@string/evsak</item>
     </array>
 
 
@@ -106,6 +107,7 @@
         <item>@string/ak</item>
         <item>@string/akmag</item>
         <item>@string/rs</item>
+        <item>@string/evsak</item>
     </array>
 
     <string name="filenotfound_snackbar">Проверьте правильность настроек</string>
@@ -138,6 +140,7 @@
 
     <string name="akb">АКб</string>
     <string name="rst">РТ</string>
+    <string name="evsak">ЭВСАК</string>
 
 
     <string name="app_math">ПМ</string>

@@ -49,6 +49,8 @@ public class TableDownloader {
         String stream = sharedPreferences.getString("stream", "0");
         String file_url = null;
         String fix = mContext.getString(R.string.m);
+        String evsakAsAKFix = mContext.getString(R.string.ak);
+
 
         Log.d(URLBUIDLER_TAG, "Check " + file_url);
         if(course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
@@ -57,14 +59,23 @@ public class TableDownloader {
         }
 
         try {
-            if (!faculty.equals(mContext.getString(R.string.mech_link)) && !spec.equals(mContext.getString(R.string.rst)) && !spec.equals(mContext.getString(R.string.uvdbobp)))
-                urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
-            else if (faculty.equals(mContext.getString(R.string.mech_link)))
+            if (compareRule(faculty, spec)) {
+                if(spec.equals(mContext.getString(R.string.evsak))) {
+                    urlPart = faculty + "/" + evsakAsAKFix + "/" + spec + " " + course + "-" + stream + ".xls";
+                }
+                else {
+                    urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
+                }
+            }
+            else if (faculty.equals(mContext.getString(R.string.mech_link))) {
                 urlPart = faculty + "/" + fix + "/" + spec + " " + course + "-" + stream + ".xls";
-            else if (spec.equals(mContext.getString(R.string.rst)))
+            }
+            else if (spec.equals(mContext.getString(R.string.rst))) {
                 urlPart = faculty + "/" + mContext.getString(R.string.rs) + "/" + spec + " " + course + "-" + stream + ".xls";
-            else if (spec.equals(mContext.getString(R.string.uvdbobp)))
+            }
+            else if (spec.equals(mContext.getString(R.string.uvdbobp))) {
                 urlPart = faculty + "/" + mContext.getString(R.string.uvd) + "/" + mContext.getString(R.string.uvd) + " " + course + "-" + stream + " " + mContext.getString(R.string.obp) + ".xls";
+            }
 
 
             file_url = "http://mstuca.ru/students/schedule/" + URLEncoder.encode(urlPart, "UTF-8").replaceAll("\\+", "%20").replaceAll("%2F", "/");
@@ -72,6 +83,10 @@ public class TableDownloader {
 
         }
         return file_url;
+    }
+
+    private boolean compareRule(String faculty, String spec) {
+        return (!faculty.equals(mContext.getString(R.string.mech_link)) && !spec.equals(mContext.getString(R.string.rst)) && !spec.equals(mContext.getString(R.string.uvdbobp)));
     }
 
     private boolean Downloader(int sheet) {

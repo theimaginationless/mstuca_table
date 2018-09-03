@@ -139,6 +139,11 @@ public class SheduleListFragment extends Fragment {
         return links;
     }*/
 
+    private boolean compareRule(Context mContext, String faculty, String spec) {
+        Log.d("RULE", "COMPARE");
+        return (!faculty.equals(mContext.getString(R.string.mech_link)) && !spec.equals(mContext.getString(R.string.rst)) && !spec.equals(mContext.getString(R.string.uvdbobp)));
+    }
+
 
     private boolean downloadFile(Context mContext, int sheet, boolean first) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -149,6 +154,7 @@ public class SheduleListFragment extends Fragment {
         String file_url = null;
         String fix = getString(R.string.m);
         String specsymb = "-";
+        String evsakAsAKFix = mContext.getString(R.string.ak);
         //Log.d("PARSERHTML", pageParser());
 
         Log.d("sheduleDownloader", "SHEET: " + Integer.toString(sheet));
@@ -165,20 +171,23 @@ public class SheduleListFragment extends Fragment {
         Log.d("ERERRE", spec);
         String urlPart = null;
         try {
-            if(!faculty.equals(getString(R.string.mech_link)) && !spec.equals(getString(R.string.rst)) && !spec.equals(getString(R.string.uvdbobp))) {
-                // Shitburger from MSTUCA
-                /*if(spec.equals(getString(R.string.app_math_val)) && course.equals("1")) {
-                    stream = "";
-                    specsymb = "";
-                }*/
-                urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + specsymb + stream + ".xls";
+            if (compareRule(mContext, faculty, spec)) {
+                if(spec.equals(mContext.getString(R.string.evsak))) {
+                    urlPart = faculty + "/" + evsakAsAKFix + "/" + spec + " " + course + "-" + stream + ".xls";
+                }
+                else {
+                    urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
+                }
             }
-            else if(faculty.equals(getString(R.string.mech_link)))
+            else if(faculty.equals(getString(R.string.mech_link))) {
                 urlPart = faculty + "/" + fix + "/" + spec + " " + course + "-" + stream + ".xls";
-            else if(spec.equals(getString(R.string.rst)))
+            }
+            else if(spec.equals(getString(R.string.rst))) {
                 urlPart = faculty + "/" + getString(R.string.rs) + "/" + spec + " " + course + "-" + stream + ".xls";
-            else if(spec.equals(getString(R.string.uvdbobp)))
-                urlPart = faculty + "/" + getString(R.string.uvd) + "/" + getString(R.string.uvd) + " " + course + "-" + stream + " " + getString(R.string.obp) +".xls";
+            }
+            else if(spec.equals(getString(R.string.uvdbobp))) {
+                urlPart = faculty + "/" + getString(R.string.uvd) + "/" + getString(R.string.uvd) + " " + course + "-" + stream + " " + getString(R.string.obp) + ".xls";
+            }
 
 
             file_url = "http://mstuca.ru/students/schedule/" + URLEncoder.encode(urlPart, "UTF-8").replaceAll("\\+", "%20").replaceAll("%2F", "/");
