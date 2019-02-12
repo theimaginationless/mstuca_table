@@ -30,6 +30,7 @@ import java.util.Locale;
  */
 
 public class TableDownloader {
+    private static final String TAG = "tableDownloader";
     private static final String URLBUIDLER_TAG = "UrlBuilder";
     private static final String DOWNLOADER_TAG = "Downloader";
     private Context mContext;
@@ -82,6 +83,7 @@ public class TableDownloader {
         } catch (UnsupportedEncodingException e) {
 
         }
+        Log.d(TAG, "URL = " + file_url);
         return file_url;
     }
 
