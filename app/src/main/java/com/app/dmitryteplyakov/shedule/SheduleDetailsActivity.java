@@ -1,10 +1,7 @@
 package com.app.dmitryteplyakov.shedule;
 
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Created by Dmitry on 20.07.2017.

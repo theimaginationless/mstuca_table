@@ -4,7 +4,8 @@
         android:title="@string/faculty"
         android:key="faculty"
         android:entries="@array/faculties"
-        android:entryValues="@array/faculties_values"/>
+        android:entryValues="@array/faculties_values"
+        android:icon="@drawable/ic_school_black_24dp"/>
     <ListPreference
         android:title="@string/spec"
         android:enabled="false"
@@ -38,14 +39,17 @@
     <EditTextPreference
         android:title="@string/forced_uri_path"
         android:key="forced_uri_path"
-        android:summary="@string/forced_uri_path_desc"/>
+        android:summary="@string/forced_uri_path_desc"
+        android:icon="@drawable/ic_link_black_24dp"/>
     <SwitchPreference
         android:defaultValue="true"
         android:title="@string/check_update_when_start"
-        android:key="check_update_when_start"/>
+        android:key="check_update_when_start"
+        android:icon="@drawable/ic_refresh_black_24dp"/>
     <SwitchPreference
         android:defaultValue="false"
         android:title="@string/forced_dark_theme"
         android:key="forced_dark_theme"
-        android:summary="@string/forced_dark_theme_desc"/>
+        android:summary="@string/forced_dark_theme_desc"
+        android:icon="@drawable/ic_brightness_high_black_24dp"/>
 </PreferenceScreen>

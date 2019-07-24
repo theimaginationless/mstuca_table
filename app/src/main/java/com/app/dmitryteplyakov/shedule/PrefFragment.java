@@ -2,11 +2,12 @@ package com.app.dmitryteplyakov.shedule;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.SwitchPreference;
-import android.support.v7.preference.ListPreference;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceFragmentCompat;
-import android.support.v7.preference.PreferenceManager;
+
+import androidx.preference.EditTextPreference;
+import androidx.preference.ListPreference;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 import android.util.Log;
 
 import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
@@ -40,6 +41,7 @@ public class PrefFragment extends PreferenceFragmentCompat {
                 ListPreference prefListFaculty = (ListPreference) findPreference("faculty");
                 final ListPreference prefListSpec = (ListPreference) findPreference("spec");
                 final ListPreference prefListStream = (ListPreference) findPreference("stream");
+                EditTextPreference editTextPreference = (EditTextPreference) findPreference("forced_uri_path");
 
                 String specVal = sharedPreferences.getString("faculty", "0");
 
@@ -162,6 +164,17 @@ public class PrefFragment extends PreferenceFragmentCompat {
                     }
                 });
                 prefListLab.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newVal) {
+                        if(!firstListLabValue.equals((String) newVal)) {
+                            DisciplineStorage.get(getActivity()).resetDb();
+                            Log.d("Pref", "SDrop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                            SheduleListFragment.setNeedUpdate(true);
+                        }
+                        return true;
+                    }
+                });
+                editTextPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newVal) {
                         if(!firstListLabValue.equals((String) newVal)) {

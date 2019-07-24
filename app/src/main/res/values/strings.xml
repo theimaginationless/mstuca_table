@@ -168,4 +168,5 @@
     <string name="open_calendar_toolbar">Открыть календарь</string>
     <string name="pair_clipboard">-я пара</string>
     <string name="toast_pair_clipboard">Скопировано!</string>
+    <string name="network_violation_cleartext">Незащищённое соединение разрешено только с узлом mstuca.ru</string>
 </resources>

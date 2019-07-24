@@ -7,23 +7,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
-import android.support.v14.preference.SwitchPreference;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.LinearSmoothScroller;
-import android.support.v7.widget.RecyclerView;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.preference.SwitchPreference;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.strictmode.CleartextNetworkViolation;
+import android.os.strictmode.Violation;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,9 +40,6 @@ import com.app.dmitryteplyakov.shedule.Core.Discipline;
 import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
 import com.app.dmitryteplyakov.shedule.Core.TableParser;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -48,22 +47,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
 
 /**
@@ -277,13 +272,18 @@ public class SheduleListFragment extends Fragment {
             }
             turnOff = true;
             return false;
-        } catch(MalformedURLException e) {
+        } catch (MalformedURLException e) {
             Log.e("SLFDownloader", "Wrong address!", e);
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.proto_error), Snackbar.LENGTH_LONG).show();
             turnOff = true;
             return false;
         } catch(IOException e) {
             Log.e("SheduleDownloader", "Error IO " + e);
+            if(e.getMessage().contains("Cleartext HTTP traffic to")) {
+                Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.network_violation_cleartext), Snackbar.LENGTH_LONG).show();
+            } else {
+                Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), e.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+            }
             turnOff = true;
             return false;
         } finally {
