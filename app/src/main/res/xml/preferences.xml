@@ -35,8 +35,17 @@
         android:enabled="false"
         android:entries="@array/subgroup"
         android:entryValues="@array/subgroup"/>
+    <EditTextPreference
+        android:title="@string/forced_uri_path"
+        android:key="forced_uri_path"
+        android:summary="@string/forced_uri_path_desc"/>
     <SwitchPreference
         android:defaultValue="true"
         android:title="@string/check_update_when_start"
         android:key="check_update_when_start"/>
+    <SwitchPreference
+        android:defaultValue="false"
+        android:title="@string/forced_dark_theme"
+        android:key="forced_dark_theme"
+        android:summary="@string/forced_dark_theme_desc"/>
 </PreferenceScreen>

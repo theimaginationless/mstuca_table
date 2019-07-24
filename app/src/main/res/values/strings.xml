@@ -158,8 +158,14 @@
     <string name="select_started_hint_snackbar">Выберите группу и курс в настройках</string>
 
     <string name="update_toolbar">Обновить</string>
-    <string name="check_update_when_start">Проверять обновление расписания при запуске</string>
+    <string name="check_update_when_start">Проверять актуальность при запуске</string>
+    <string name="forced_dark_theme">Принудительно включить тёмную тему</string>
+    <string name="forced_dark_theme_desc">Требуется перезапуск приложения</string>
+    <string name="filenotfound_forced_uri_snackbar">Файл не найден!</string>
+    <string name="proto_error">Не указан протокол URL</string>
+    <string name="forced_uri_path">Путь до xls</string>
+    <string name="forced_uri_path_desc">Указать путь до xls с расписанием</string>
     <string name="open_calendar_toolbar">Открыть календарь</string>
     <string name="pair_clipboard">-я пара</string>
-    <string name="toast_pair_clipboard">Дисциплина скопирована</string>
+    <string name="toast_pair_clipboard">Скопировано!</string>
 </resources>

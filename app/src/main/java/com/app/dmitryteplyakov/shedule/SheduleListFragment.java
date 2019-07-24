@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -147,6 +148,7 @@ public class SheduleListFragment extends Fragment {
 
     private boolean downloadFile(Context mContext, int sheet, boolean first) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String forcedURIPath = sharedPreferences.getString("forced_uri_path", "");
         String faculty = sharedPreferences.getString("faculty", "0");
         String spec = sharedPreferences.getString("spec", "0");
         String course = sharedPreferences.getString("course", "0");
@@ -158,46 +160,46 @@ public class SheduleListFragment extends Fragment {
         //Log.d("PARSERHTML", pageParser());
 
         Log.d("sheduleDownloader", "SHEET: " + Integer.toString(sheet));
-        if(sheet != 0 && isNotGlobalChanges) {
+        if (sheet != 0 && isNotGlobalChanges) {
             Log.d("sheduleDownloader", "Is not global changes in shedule. Skip downloading...");
             return true;
         }
 
-        if (course.equals("0")) {
+        if (course.equals("0") && forcedURIPath.isEmpty()) {
             turnOff = true;
             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.select_started_hint_snackbar), Snackbar.LENGTH_LONG).show();
             return false;
         }
-        Log.d("ERERRE", spec);
         String urlPart = null;
         try {
-            if (compareRule(mContext, faculty, spec)) {
-                if(spec.equals(mContext.getString(R.string.evsak))) {
-                    urlPart = faculty + "/" + evsakAsAKFix + "/" + spec + " " + course + "-" + stream + ".xls";
+            if (forcedURIPath.isEmpty()) {
+                if (compareRule(mContext, faculty, spec)) {
+                    if (spec.equals(mContext.getString(R.string.evsak))) {
+                        urlPart = faculty + "/" + evsakAsAKFix + "/" + spec + " " + course + "-" + stream + ".xls";
+                    } else {
+                        urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
+                    }
+                } else if (faculty.equals(getString(R.string.mech_link))) {
+                    urlPart = faculty + "/" + fix + "/" + spec + " " + course + "-" + stream + ".xls";
+                } else if (spec.equals(getString(R.string.rst))) {
+                    urlPart = faculty + "/" + getString(R.string.rs) + "/" + spec + " " + course + "-" + stream + ".xls";
+                } else if (spec.equals(getString(R.string.uvdbobp))) {
+                    urlPart = faculty + "/" + getString(R.string.uvd) + "/" + getString(R.string.uvd) + " " + course + "-" + stream + " " + getString(R.string.obp) + ".xls";
                 }
-                else {
-                    urlPart = faculty + "/" + spec.substring(0, spec.length() - 1) + "/" + spec + " " + course + "-" + stream + ".xls";
-                }
-            }
-            else if(faculty.equals(getString(R.string.mech_link))) {
-                urlPart = faculty + "/" + fix + "/" + spec + " " + course + "-" + stream + ".xls";
-            }
-            else if(spec.equals(getString(R.string.rst))) {
-                urlPart = faculty + "/" + getString(R.string.rs) + "/" + spec + " " + course + "-" + stream + ".xls";
-            }
-            else if(spec.equals(getString(R.string.uvdbobp))) {
-                urlPart = faculty + "/" + getString(R.string.uvd) + "/" + getString(R.string.uvd) + " " + course + "-" + stream + " " + getString(R.string.obp) + ".xls";
-            }
 
-
-            file_url = "http://mstuca.ru/students/schedule/" + URLEncoder.encode(urlPart, "UTF-8").replaceAll("\\+", "%20").replaceAll("%2F", "/");
-        } catch(UnsupportedEncodingException e) {
+                file_url = "http://mstuca.ru/students/schedule/" + URLEncoder.encode(urlPart, "UTF-8").replaceAll("\\+", "%20").replaceAll("%2F", "/");
+            } else {
+                file_url = URLEncoder.encode(forcedURIPath, "UTF-8").replaceAll("%3A", ":").replaceAll("\\+", "%20").replaceAll("%2F", "/");
+            }
+        } catch (UnsupportedEncodingException e) {
 
         }
         Log.d("SLFDownloader", "Check " + file_url);
-        if(course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
-            Log.d("SLFDownloader", "Data isn't fully!");
-            return false;
+        if (forcedURIPath.isEmpty()) {
+            if (course.equals("0") || faculty.equals("0") || spec.equals("0") || stream.equals("0")) {
+                Log.d("SLFDownloader", "Data isn't fully!");
+                return false;
+            }
         }
 
         InputStream input = null;
@@ -216,12 +218,13 @@ public class SheduleListFragment extends Fragment {
             String lastModRemoteString = connection.getHeaderField("Last-Modified");
             SimpleDateFormat dateformatter = new SimpleDateFormat("E, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
             Date lastModRemote = new Date(connection.getLastModified());
+            int remoteSize = connection.getContentLength();
             File localFile = new File(mContext.getFilesDir(), filename);
             Log.d("Already?", Boolean.toString(localFile.exists()));
             Log.d("Course changed?", Boolean.toString(isCourseChanged));
 
 
-            if (isDbDrop && localFile.exists() && !isCourseChanged)
+            if (isDbDrop && localFile.exists() && !isCourseChanged && forcedURIPath.isEmpty())
                 return true;
 
             if (!forcedUpdate && !isCourseChanged) {
@@ -229,8 +232,9 @@ public class SheduleListFragment extends Fragment {
                 if (localFile.exists()) {
                     localeShedule = mContext.openFileInput(filename);
                     Date lastModLocal = new Date(localFile.lastModified());
+                    int localSize = (int) localFile.length(); // Because we have small files only
                     Log.d("SLFDownloader", lastModLocal.toString() + " " + lastModRemote.toString());
-                    if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote))) {
+                    if ((lastModLocal.equals(lastModRemote) || lastModLocal.after(lastModRemote)) && (localSize == remoteSize)) {
                         if (swipeRefresh && first)
                             Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.data_already_fresh), Snackbar.LENGTH_SHORT).show();
                         Log.d("SLFDownloader", "Data is fresh. Skip downloading...");
@@ -243,7 +247,6 @@ public class SheduleListFragment extends Fragment {
             forcedUpdate = false;
             dropDb();
             swipeRefresh = true;
-
 
 
             output = mContext.openFileOutput(filename, Context.MODE_PRIVATE);
@@ -264,9 +267,19 @@ public class SheduleListFragment extends Fragment {
             Log.e("SLFDownloader", "Wrong address or cannot connecting to internet?", e);
             turnOff = true;
             return false;
-        } catch(FileNotFoundException e) {
-            if(first)
-                Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.filenotfound_snackbar), Snackbar.LENGTH_LONG).show();
+        } catch (FileNotFoundException e) {
+            if (first) {
+                int resMsg = R.string.filenotfound_snackbar;
+                if (!forcedURIPath.isEmpty()) {
+                    resMsg = R.string.filenotfound_forced_uri_snackbar;
+                }
+                Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), resMsg, Snackbar.LENGTH_LONG).show();
+            }
+            turnOff = true;
+            return false;
+        } catch(MalformedURLException e) {
+            Log.e("SLFDownloader", "Wrong address!", e);
+            Snackbar.make(getActivity().findViewById(R.id.snackbar_layout), getString(R.string.proto_error), Snackbar.LENGTH_LONG).show();
             turnOff = true;
             return false;
         } catch(IOException e) {
@@ -509,9 +522,11 @@ public class SheduleListFragment extends Fragment {
 
             }
         });
+        // Disabled itemDecorations (separators).
+        /*
         mDividerItemDecorator = new DividerItemDecoration(mRecyclerView.getContext(), linearLayoutManager.getOrientation());
         mRecyclerView.addItemDecoration(mDividerItemDecorator);
-
+        */
         mClipboardManager = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
