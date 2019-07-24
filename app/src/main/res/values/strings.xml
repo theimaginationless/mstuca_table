@@ -163,8 +163,8 @@
     <string name="forced_dark_theme_desc">Требуется перезапуск приложения</string>
     <string name="filenotfound_forced_uri_snackbar">Файл не найден!</string>
     <string name="proto_error">Не указан протокол URL</string>
-    <string name="forced_uri_path">Путь до xls</string>
-    <string name="forced_uri_path_desc">Указать путь до xls с расписанием</string>
+    <string name="forced_uri_path">Адрес до xls документа</string>
+    <string name="forced_uri_path_desc">Указать URL адрес xls с расписанием</string>
     <string name="open_calendar_toolbar">Открыть календарь</string>
     <string name="pair_clipboard">-я пара</string>
     <string name="toast_pair_clipboard">Скопировано!</string>
