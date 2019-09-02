@@ -32,6 +32,8 @@ public class TableParser {
     private int mLangGroup;
     private String mFileName;
     private boolean mIsNew;
+    private SharedPreferences pref;
+
     public TableParser(boolean isNew, int sheet, int labGroup, int langGroup, String filename, Context context) {
         mIsNew = isNew;
         mSheet = sheet;
@@ -39,7 +41,7 @@ public class TableParser {
         mLangGroup = langGroup;
         mFileName = filename;
         mContext = context.getApplicationContext();
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        pref = PreferenceManager.getDefaultSharedPreferences(mContext);
     }
     public void parse() {
 
@@ -78,7 +80,7 @@ public class TableParser {
 
         for (int rowIndex = 1; rowIndex + 3 <= mySheduleSheet.getLastRowNum(); rowIndex++) {
             if (mySheduleSheet.getRow(rowIndex + 2).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex + 1).getCell(2).getStringCellValue().equals("") || mySheduleSheet.getRow(rowIndex).getCell(2).getStringCellValue().equals("")) {
-                //Log.d(TAG, "EMPTY!");
+                Log.d(TAG, "EMPTY!");
                 continue;
             }
 
@@ -96,7 +98,7 @@ public class TableParser {
              * Ohh, it's a workaround...
              */
             if(disciplineType.equals("Экзамен") || disciplineType.equals("Консультация") || disciplineType.equals("Зачет(диф.зач.)") || (disciplineTitle.equals("Иностранный язык") && (mSheet == 0))) {
-                //Log.d(TAG, "Skip as workaround: " + disciplineTitle + " " + disciplineType);
+                Log.d(TAG, "Skip as workaround: " + disciplineTitle + " " + disciplineType);
                 rowIndex += 2;
                 onceDiscipline = false;
                 continue;
@@ -107,17 +109,17 @@ public class TableParser {
                     disciplineType = "Пр.Зан.";
                 }
                 if (mSheet != mLangGroup && (disciplineType.contains("Пр.Зан.") || disciplineType.contains("Лекция"))) {
-                    //Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(mSheet - 1));
+                    Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(mSheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
-                    //Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex - 1));
+                    Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex - 1));
                     continue;
                 }
                 if (mSheet != mLabGroup && disciplineType.contains("Лаб.раб.")) {
-                    //Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(mSheet - 1));
+                    Log.d(TAG, "skip " + disciplineTitle + " " + teacherName + " subgroup " + Integer.toString(mSheet - 1));
                     rowIndex += 2;
                     onceDiscipline = false;
-                    //Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex + 1));
+                    Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 2) + " NEW: " + Integer.toString(rowIndex + 1));
                     continue;
                 }
             }
@@ -126,7 +128,7 @@ public class TableParser {
             for (CellRangeAddress region : regions) {
                 if (region.isInRange(rowIndex, 1)) {
                     for (int i = 0; i <= region.getLastRow(); i++) {
-                        //Log.d(TAG, "PRE: " + mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue());
+                        Log.d(TAG, "PRE: " + mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue());
                         if (mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue().equals(""))
                             continue;
                         week = mySheduleSheet.getRow(region.getFirstRow()).getCell(1).getStringCellValue();
@@ -139,7 +141,7 @@ public class TableParser {
             for (CellRangeAddress region : regions) {
                 if (region.isInRange(rowIndex, 0)) {
                     for (int i = 0; i <= region.getLastRow(); i++) {
-                        //Log.d(TAG, "INDEX: " + Integer.toString(rowIndex) + " PRE: " + (int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue());
+                        Log.d(TAG, "INDEX: " + Integer.toString(rowIndex) + " PRE: " + (int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue());
                         if ((int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue() == 0)
                             continue;
                         number = (int) mySheduleSheet.getRow(region.getFirstRow()).getCell(0).getNumericCellValue();
@@ -148,7 +150,7 @@ public class TableParser {
                 }
             }
 
-            //Log.d(TAG, "TITLE: " + disciplineTitle + " WEEK: " + week);
+            Log.d(TAG, "TITLE: " + disciplineTitle + " WEEK: " + week);
 
 
             SimpleDateFormat dateFormatter = null;
@@ -161,7 +163,7 @@ public class TableParser {
             if (dateRange.contains("с ")) {
                 if (dateRange.contains("кроме")) {
                     date = dateRange.replaceFirst("     с ", "").replace(" по ", "|").replace("       кроме ", "|");
-                    //Log.d(TAG, "кроме");
+                    Log.d(TAG, "кроме");
                     int sliceIndex = date.indexOf("|");
                     int endSliceIndex = date.indexOf("|", sliceIndex + 1);
 
@@ -169,14 +171,14 @@ public class TableParser {
                     secondPart = date.substring(sliceIndex + 1, endSliceIndex);
                     exclusePart = date.substring(endSliceIndex + 1);
                 } else {
-                    //Log.d(TAG, "С!!!");
+                    Log.d(TAG, "С!!!");
                     date = dateRange.replaceFirst("     с ", "").replace(" по ", "|");
                     int sliceIndex = date.indexOf("|");
                     firstPart = date.substring(0, sliceIndex);
                     secondPart = date.substring(sliceIndex + 1);
                 }
             } else if (dateRange.contains("только ")) {
-                //Log.d(TAG, "Только!");
+                Log.d(TAG, "Только!");
                 onceDiscipline = true;
                 date = dateRange.replaceFirst("     только", "");
                 firstPart = date;
@@ -202,7 +204,7 @@ public class TableParser {
                             arrayParts.add(firstPart.substring(firstI, i + 1));
                     }
                     for (String str : arrayParts) {
-                        //Log.d(TAG, "STR FOR ONCE CALENDARS: " + str);
+                        Log.d(TAG, "STR FOR ONCE CALENDARS: " + str);
                         Calendar onceCal = Calendar.getInstance(new Locale("ru"));
                         Date current = dateFormatter.parse(str);
                         onceCal.setTime(current);
@@ -229,7 +231,7 @@ public class TableParser {
             startCalendar.set(Calendar.SECOND, 0);
             startCalendar.set(Calendar.MILLISECOND, 0);
 
-            //Log.d(TAG, "FIRST: " + startCalendar.getTime().toString());
+            Log.d(TAG, "FIRST: " + startCalendar.getTime().toString());
 
             if (!secondPart.equals("")) {
                 dateFormatter.applyPattern("dd.MM");
@@ -266,7 +268,7 @@ public class TableParser {
                             arrayParts.add(exclusePart.substring(firstI, i + 1));
                     }
                     for (String str : arrayParts) {
-                        //Log.d(TAG, "STR FOR EXCL CALENDARS: " + str);
+                        Log.d(TAG, "STR FOR EXCL CALENDARS: " + str);
 
                         Calendar exclCal = Calendar.getInstance(new Locale("ru"));
                         Date current = dateFormatter.parse(str);
@@ -326,18 +328,18 @@ public class TableParser {
                         startMonth = onceCalendars.get(i).get(Calendar.MONTH);
                         endMonth = onceCalendars.get(i).get(Calendar.MONTH);
                     }
-                    //Log.d(TAG, "STARTMONTH: " + Integer.toString(startMonth + 1) + " ENDMONTH: " + Integer.toString(endMonth + 1));
+                    Log.d(TAG, "STARTMONTH: " + Integer.toString(startMonth + 1) + " ENDMONTH: " + Integer.toString(endMonth + 1));
                 }
                 for (int MONTH = startCalendar.get(Calendar.MONTH); MONTH <= endCalendar.get(Calendar.MONTH); MONTH++) {
 
-                    //Log.d(TAG, "MONTH START: " + Integer.toString(MONTH + 1) + " MONTH END: " + Integer.toString(endCalendar.get(Calendar.MONTH) + 1));
+                    Log.d(TAG, "MONTH START: " + Integer.toString(MONTH + 1) + " MONTH END: " + Integer.toString(endCalendar.get(Calendar.MONTH) + 1));
                     int startDay;
                     int endDay;
                     Calendar tempStart = Calendar.getInstance(new Locale("ru"));
                     tempStart.set(Calendar.MONTH, MONTH);
                     Calendar tempEnd = Calendar.getInstance(new Locale("ru"));
                     tempEnd.set(Calendar.MONTH, MONTH);
-                    //Log.d(TAG, "FIRST MONTH: " + Boolean.toString(firstMonth));
+                    Log.d(TAG, "FIRST MONTH: " + Boolean.toString(firstMonth));
                     if (firstMonth) {
                         startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
                     } else {
@@ -347,15 +349,15 @@ public class TableParser {
                     if (startCalendar.get(Calendar.MONTH) == endCalendar.get(Calendar.MONTH)) {
                         startDay = startCalendar.get(Calendar.DAY_OF_MONTH);
                         endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
-                        //Log.d(TAG, "ONE DAY OR MONTH ONLY! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                        Log.d(TAG, "ONE DAY OR MONTH ONLY! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
                     } else if (MONTH == endCalendar.get(Calendar.MONTH)) {
                         startDay = tempStart.getActualMinimum(Calendar.DAY_OF_MONTH);
                         endDay = endCalendar.get(Calendar.DAY_OF_MONTH);
-                        //Log.d(TAG, "LAST MONTH! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                        Log.d(TAG, "LAST MONTH! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
                     } else {
-                        //Log.d(TAG, "PERIOD! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
+                        Log.d(TAG, "PERIOD! FIRSTDAY: " + Integer.toString(startDay) + " ENDDAY: " + Integer.toString(endDay));
                     }
-                    //Log.d(TAG, "DAY START THIS MONTH: " + Integer.toString(startDay) + " DAY END THIS MONTH: " + Integer.toString(endDay));
+                    Log.d(TAG, "DAY START THIS MONTH: " + Integer.toString(startDay) + " DAY END THIS MONTH: " + Integer.toString(endDay));
                     firstMonth = false;
                     for (int DAY = startDay; DAY <= endDay; DAY++) {
                         Calendar resultCalendar = Calendar.getInstance(new Locale("ru"));
@@ -372,12 +374,18 @@ public class TableParser {
                         resultCalendar.set(Calendar.YEAR, year.get(Calendar.YEAR));
                         Calendar sept = Calendar.getInstance(new Locale("ru"));
                         sept.set(resultCalendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1, 0, 0, 0);
-                        switch ((resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2) {
+                        Boolean isEvenInverse = pref.getBoolean("even_inverse", false);
+                        int even = (resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR)) % 2;
+                        if(isEvenInverse) {
+                            even = (resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) % 2;
+                        }
+                        Log.d("Parser", "even is " + even);
+                        switch (even) {
                             case 1:
-                                //Log.d(TAG, "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Верхняя");
+                                Log.d(TAG, "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Верхняя");
                                 break;
                             case 0:
-                                //Log.d(TAG, "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Нижняя");
+                                Log.d(TAG, "MONTH: " + Integer.toString(MONTH + 1) + " DAY: " + Integer.toString(DAY) + " Нижняя");
                                 break;
                         }
 
@@ -387,7 +395,7 @@ public class TableParser {
                             int j = 0;
                             for(j = 0; j < excludeCals.size(); j++) {
                                 if ((int) excludeCals.get(j).get(Calendar.DAY_OF_MONTH) == DAY && (int) excludeCals.get(j).get(Calendar.MONTH) == MONTH) {
-                                    //Log.d(TAG, "EXCLUDE!" + excludeCals.get(j).getTime().toString() + " TITLE: " + disciplineTitle);
+                                    Log.d(TAG, "EXCLUDE!" + excludeCals.get(j).getTime().toString() + " TITLE: " + disciplineTitle);
                                     break;
                                 }
                             }
@@ -398,6 +406,7 @@ public class TableParser {
 
 
                         int weekInt = 2;
+                        Log.d("Parser weeks", week);
                         if (week.equals("В"))
                             weekInt = 1;
                         else if (week.equals("Н"))
@@ -409,9 +418,13 @@ public class TableParser {
                         if (startWeek == endWeek) {
                             //Log.d(TAG, "COMPARED!");
 
-                            //Log.d(TAG, Integer.toString(Math.abs(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1)) + " DISCIPLINE CAL: " + Integer.toString(weekInt));
-                            if ((Math.abs(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1)) % 2 == weekInt || weekInt == 2) {
-                                //Log.d(TAG, "TITLE: " + disciplineTitle + " DAY: " + Integer.toString(DAY) + " MONTH: " + Integer.toString(MONTH + 1) + " NUM: " + Integer.toString(number) + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) + " CURRENT DAY: " + Integer.toString(DAY));
+                            Log.d(TAG, Integer.toString(Math.abs(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1)) + " DISCIPLINE CAL: " + Integer.toString(weekInt));
+                            int weekEven = (Math.abs(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR))) % 2;
+                            if(isEvenInverse) {
+                                weekEven = (Math.abs(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
+                            }
+                            if (weekEven == weekInt || weekInt == 2) {
+                                Log.d(TAG, "TITLE: " + disciplineTitle + " DAY: " + Integer.toString(DAY) + " MONTH: " + Integer.toString(MONTH + 1) + " NUM: " + Integer.toString(number) + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1) + " CURRENT DAY: " + Integer.toString(DAY));
                                 Discipline tempDiscipline = new Discipline();
                                 tempDiscipline.setNumber(number);
                                 tempDiscipline.setType(disciplineType);
@@ -466,7 +479,7 @@ public class TableParser {
                                     }
                                 }*/
                                 DisciplineStorage.get(mContext).addDisciple(tempDiscipline);
-                                //Log.d(TAG, "SHEET: " + Integer.toString(mSheet) + " TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
+                                Log.d(TAG, "SHEET: " + Integer.toString(mSheet) + " TITLE: " + tempDiscipline.getDiscipleName() + " DATE: " + dateFormatter.format(tempDiscipline.getDate()) + " NUM: " + tempDiscipline.getNumber() + " WEEK: " + week + " WEEKCURRENT: " + Integer.toString(resultCalendar.get(Calendar.WEEK_OF_YEAR) - sept.get(Calendar.WEEK_OF_YEAR) + 1));
 
                             } else
                                 continue;
@@ -478,7 +491,7 @@ public class TableParser {
             }
             rowIndex += 2;
             onceDiscipline = false;
-            //Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 3) + " NEW: " + Integer.toString(rowIndex));
+            Log.d(TAG, "JUMP: OLD: " + Integer.toString(rowIndex - 3) + " NEW: " + Integer.toString(rowIndex));
         }
     }
 }

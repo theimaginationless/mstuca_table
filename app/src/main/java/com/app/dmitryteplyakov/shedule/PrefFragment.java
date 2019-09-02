@@ -8,6 +8,8 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+import androidx.preference.SwitchPreference;
+
 import android.util.Log;
 
 import com.app.dmitryteplyakov.shedule.Core.DisciplineStorage;
@@ -42,6 +44,7 @@ public class PrefFragment extends PreferenceFragmentCompat {
                 final ListPreference prefListSpec = (ListPreference) findPreference("spec");
                 final ListPreference prefListStream = (ListPreference) findPreference("stream");
                 EditTextPreference editTextPreference = (EditTextPreference) findPreference("forced_uri_path");
+                SwitchPreference switchPreferenceEvenInverse = (SwitchPreference) findPreference("even_inverse");
 
                 String specVal = sharedPreferences.getString("faculty", "0");
 
@@ -72,6 +75,18 @@ public class PrefFragment extends PreferenceFragmentCompat {
                         return true;
                     }
                 });
+
+//                switchPreferenceEvenInverse.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//                    @Override
+//                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                        Log.d("Pref", "Change even inverse to " + Boolean.toString((Boolean) newValue));
+//                        DisciplineStorage.get(getActivity()).resetDb();
+//                        Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+//                        SheduleListFragment.setIsCourseChanged(true);
+//                        SheduleListFragment.setNeedUpdate(true);
+//                        return true;
+//                    }
+//                });
 
 
                 if(!sharedPreferences.getString("course", "0").equals("0")) {

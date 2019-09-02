@@ -156,7 +156,8 @@
     <string name="ek">ЭК</string>
 
     <string name="select_started_hint_snackbar">Выберите группу и курс в настройках</string>
-
+    <string name="even_inverse">Инверсия чётности недели</string>
+    <string name="even_inverse_description">Включить при отсутствии некоторых занятий в списке</string>
     <string name="update_toolbar">Обновить</string>
     <string name="check_update_when_start">Проверять актуальность при запуске</string>
     <string name="forced_dark_theme">Принудительно включить тёмную тему</string>
