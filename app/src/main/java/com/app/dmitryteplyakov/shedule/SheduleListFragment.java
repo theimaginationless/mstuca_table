@@ -813,6 +813,16 @@ public class SheduleListFragment extends Fragment {
                 AsyncLoader loader = new AsyncLoader(0);
                 loader.execute(getActivity());
                 return true;
+            case R.id.forced_refresh_toolbar:
+                DisciplineStorage.get(getActivity()).resetDb();
+                Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                setIsCourseChanged(true);
+                setNeedUpdate(true);
+                swipeRefresh = true;
+                //checkStarter(getActivity());
+                loader = new AsyncLoader(0);
+                loader.execute(getActivity());
+                return true;
             case R.id.settings:
                 Intent intent = PrefActivity.newIntent(getActivity(), "general");
                 startActivity(intent);

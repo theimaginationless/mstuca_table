@@ -76,17 +76,17 @@ public class PrefFragment extends PreferenceFragmentCompat {
                     }
                 });
 
-//                switchPreferenceEvenInverse.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-//                    @Override
-//                    public boolean onPreferenceChange(Preference preference, Object newValue) {
-//                        Log.d("Pref", "Change even inverse to " + Boolean.toString((Boolean) newValue));
-//                        DisciplineStorage.get(getActivity()).resetDb();
-//                        Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
-//                        SheduleListFragment.setIsCourseChanged(true);
-//                        SheduleListFragment.setNeedUpdate(true);
-//                        return true;
-//                    }
-//                });
+                switchPreferenceEvenInverse.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        Log.d("Pref", "Change even inverse to " + Boolean.toString((Boolean) newValue));
+                        DisciplineStorage.get(getActivity()).resetDb();
+                        Log.d("Pref", "Drop DB! Count: " + Integer.toString(DisciplineStorage.get(getActivity()).getDisciplines().size()));
+                        SheduleListFragment.setIsCourseChanged(true);
+                        SheduleListFragment.setNeedUpdate(true);
+                        return true;
+                    }
+                });
 
 
                 if(!sharedPreferences.getString("course", "0").equals("0")) {

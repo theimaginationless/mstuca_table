@@ -42,6 +42,12 @@
         android:summary="@string/forced_uri_path_desc"
         android:icon="@drawable/ic_link_black_24dp"/>
     <SwitchPreference
+        android:defaultValue="false"
+        android:title="@string/even_inverse"
+        android:key="even_inverse"
+        android:summary="@string/even_inverse_description"
+        android:icon="@drawable/ic_refresh_black_24dp"/>
+    <SwitchPreference
         android:defaultValue="true"
         android:title="@string/check_update_when_start"
         android:key="check_update_when_start"
